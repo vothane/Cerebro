@@ -9,12 +9,12 @@
 
 (defn- uniform [min max] (* (rnd) ( + (- max min) min)))
 
-(defn make-rbm [n n-in n-out w b]
-  (->RBM n 
-         n-in
-         n-out 
-         (partition n-in 
-           (take (* n-in n-out) 
-             (repeatly (uniform (* -1 (/ 1 n-in)) (/ 1 n-in))))) 
-         (take b (repeat 0.0))))
+(defn make-hidden-layer [n n-in n-out]
+  (->HLayer n 
+            n-in
+            n-out 
+            (partition n-in 
+              (take (* n-in n-out) 
+                (repeatly (uniform (* -1 (/ 1 n-in)) (/ 1 n-in))))) 
+            (take b (repeat 0.0))))
      

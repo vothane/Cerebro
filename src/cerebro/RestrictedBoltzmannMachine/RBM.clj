@@ -13,7 +13,7 @@
 
 (defn- uniform [min max] (* (rnd) ( + (- max min) min)))
 
-(defn make-rbm [n nv nh w hb vb]
+(defn make-rbm [n nv nh hb vb]
   (->RBM n 
          nv 
          nh 
