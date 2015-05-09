@@ -1,6 +1,6 @@
 >"Cool story, Cerebro!"
 
-# cerebro
+# Cerebro
 
 A Clojure library designed to ... well, that part is up to you.
 
