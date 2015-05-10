@@ -6,10 +6,10 @@
 ; the distance to which is used to determine a class membership probability.
 
 (defrecord LogReg [N
-	               num-inputs
-	               num-outputs
-	               weights
-	               bias])
+                   num-inputs
+                   num-outputs
+                   weights
+                   bias])
 
 (defn make-log-reg [n n-in n-out]
   (->LogReg n 
@@ -17,3 +17,9 @@
             n-out 
             (partition n-out (take (* n-out n-in) (repeat 0.0))) 
             (take n-out (repeat 0.0))))	           
+
+(defn softmax [x-coll]
+  (let [_max (apply max x-coll)
+        sum  (reduce + (map #(Math/exp (- % _max)) x-coll))]
+    (map #(/ % sum) x-coll)))
+  
