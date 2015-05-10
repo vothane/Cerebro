@@ -1,3 +1,5 @@
+(ns cerebro.LogisticRegression.LogReg)
+
 ; Logistic regression is a probabilistic, linear classifier. It is parametrized
 ; by a weight matrix :math:`weights` and a bias vector :math:`bias`. 
 ; Classification is done by projecting data points onto a set of hyperplanes, 
