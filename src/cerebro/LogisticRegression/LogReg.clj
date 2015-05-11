@@ -24,9 +24,7 @@
     (map #(/ % sum) x-coll)))
 
 (defn train [logreg x y lr]
-  (let [mults (map #(map (fn [a b] (* a b)) x %) (:weights logreg))
-        px|y  (map #(reduce + %) mults)
-        px|y  (map #(+ %1 %2) px|y (:bias logreg))
+  (let [px|y  (map #(+ %1 %2) (:bias logreg) (map #(apply * (interleave % x)) (:weights logreg)))
         px|y  (softmax px|y)
         f     (fn [i j] (* lr (- (nth y i) (nth px|y i)) (/ (nth y j) (:N logreg))))
         lg    (reduce 
