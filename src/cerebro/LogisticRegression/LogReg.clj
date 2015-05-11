@@ -1,4 +1,5 @@
-(ns cerebro.LogisticRegression.LogReg)
+(ns cerebro.LogisticRegression.LogReg
+  (:use [cerebro.Utils.utils]))
 
 ; Logistic regression is a probabilistic, linear classifier. It is parametrized
 ; by a weight matrix :math:`weights` and a bias vector :math:`bias`. 
@@ -18,10 +19,6 @@
   (let [_max (apply max x-coll)
         sum  (reduce + (map #(Math/exp (- % _max)) x-coll))]
     (map #(/ % sum) x-coll)))
-
-(defn- dot-product [& matrix]
-  {:pre [(apply == (map count matrix))]}
-  (apply + (apply map * matrix)))
 
 (defn train [logreg x y lr]
   (let [px|y  (map #(+ (dot-product x %1) %2) (:weights logreg) (:bias logreg))        
