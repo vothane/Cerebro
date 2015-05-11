@@ -5,11 +5,7 @@
 ; Classification is done by projecting data points onto a set of hyperplanes, 
 ; the distance to which is used to determine a class membership probability.
 
-(defrecord LogReg [N
-                   num-inputs
-                   num-outputs
-                   weights
-                   bias])
+(defrecord LogReg [N num-inputs num-outputs weights bias])
 
 (defn make-log-reg [n n-in n-out]
   (->LogReg n 
@@ -23,8 +19,12 @@
         sum  (reduce + (map #(Math/exp (- % _max)) x-coll))]
     (map #(/ % sum) x-coll)))
 
+(defn- dot-product [& matrix]
+  {:pre [(apply == (map count matrix))]}
+  (apply + (apply map * matrix)))
+
 (defn train [logreg x y lr]
-  (let [px|y  (map #(+ %1 (apply * (interleave %2 x))) (:bias logreg) (:weights logreg))
+  (let [px|y  (map #(+ (dot-product x %1) %2) (:weights logreg) (:bias logreg))        
         px|y  (softmax px|y)
         f     (fn [i j] (* lr (- (nth y i) (nth px|y i)) (/ (nth y j) (:N logreg))))
         lg    (reduce 
