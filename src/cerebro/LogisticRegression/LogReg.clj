@@ -12,8 +12,8 @@
 (defn make-log-reg [n-in n-out]
   (->LogReg n-in 
             n-out 
-            (matrix (mapv vec (partition n-out (take (* n-out n-in) (repeat 0.0))))) 
-            (matrix (take n-out (repeat 0.0)))))	           
+            (mapv vec (partition n-out (take (* n-out n-in) (repeat 0.0))))
+            (vec (take n-out (repeat 0.0)))))	           
 
 (defn softmax [x-coll]
   (let [_max (apply max x-coll)
