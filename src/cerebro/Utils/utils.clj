@@ -1,7 +1,6 @@
 (ns cerebro.Utils.utils)
 
 (defn dot-product [& matrix]
-  {:pre [(apply == (map count matrix))]}
   (apply + (apply map * matrix)))
 
 (defmulti transpose class)
