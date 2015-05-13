@@ -1,6 +1,8 @@
 (ns cerebro.LogisticRegression.LogReg
-  (:use [cerebro.Utils.utils])
-  (:use clojure.core.matrix))
+  (:use [cerebro.Utils.utils]
+        [clojure.core.matrix])
+  (:require [clojure.core.matrix.operators :as M]
+            [clojure.math.numeric-tower :as math]))
 
 ; Logistic regression is a probabilistic, linear classifier. It is parametrized
 ; by a weight matrix :math:`weights` and a bias vector :math:`bias`. 
@@ -15,12 +17,13 @@
             (mapv vec (partition n-out (take (* n-out n-in) (repeat 0.0))))
             (vec (take n-out (repeat 0.0)))))	           
 
-(defn softmax [x-coll]
-  (let [_max (apply max x-coll)
-        sum  (reduce + (map #(Math/exp (- % _max)) x-coll))]
-    (map #(/ % sum) x-coll)))
+(defn softmax [matrix]
+  (let [_max   (apply max (flatten matrix))
+        matrix (M/- matrix _max)]
+    matrix))
 
 (defn train [logreg x y lr]
-  (let [px|y nil]
-    px|y))
+  (let [px|y (M/+ (dp x (:weights logreg)) (:bias logreg))
+        dy   (M/- y px|y)]
+    (println px|y)))
 
