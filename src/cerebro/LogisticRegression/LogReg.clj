@@ -19,11 +19,11 @@
 
 (defn softmax [matrix]
   (let [_max   (apply max (flatten matrix))
-        matrix (M/- matrix _max)]
+        matrix (- matrix _max)]
     matrix))
 
 (defn train [logreg x y lr]
-  (let [px|y (M/+ (dp x (:weights logreg)) (:bias logreg))
-        dy   (M/- y px|y)]
+  (let [px|y (+ (dot x (:weights logreg)) (:bias logreg))
+        dy   (- y px|y)]
     (println px|y)))
 
