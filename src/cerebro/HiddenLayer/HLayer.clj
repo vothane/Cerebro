@@ -1,3 +1,8 @@
+(ns cerebro.HiddenLayer.HLayer
+  (:use [cerebro.Utils.utils])
+  (:refer-clojure :exclude [* - + == / < <= > >= not= = min max])
+  (:require [clojure.core.matrix :refer :all]
+            [clojure.core.matrix.operators :refer :all]))
 
 (defrecord HLayer [N
 	               n-inputs

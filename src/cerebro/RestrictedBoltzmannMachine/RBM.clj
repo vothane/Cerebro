@@ -1,3 +1,9 @@
+(ns cerebro.RestrictedBoltzmannMachine.RBM
+  (:use [cerebro.Utils.utils])
+  (:refer-clojure :exclude [* - + == / < <= > >= not= = min max])
+  (:require [clojure.core.matrix :refer :all]
+            [clojure.core.matrix.operators :refer :all]))
+
 ; Boltzmann Machines (BMs) are a particular form of energy-based model which
 ; contain hidden variables. Restricted Boltzmann Machines further restrict BMs
 ; to those without visible-visible and hidden-hidden connections.
