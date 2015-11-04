@@ -17,10 +17,11 @@
             (mapv vec (partition n-out (take (* n-out n-in) (repeat 0.0))))
             (vec (take n-out (repeat 0.0)))))
 
-(defn softmax [matrix]
-  (let [_max   (apply max (flatten matrix))
-        matrix (- matrix _max)]
-    matrix))
+(defn softmax [x]
+  (let [max (emax x)
+        x   (emap #(Math/exp (- % max)) x)
+        sum (esum x)]
+    (emap #(/ % sum) x)))
 
 (defn train [logreg x y lr]
   (let [px|y (+ (dot x (:weights logreg)) (:bias logreg))
