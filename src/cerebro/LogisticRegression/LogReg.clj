@@ -1,6 +1,6 @@
 (ns cerebro.LogisticRegression.LogReg
   (:use [cerebro.Utils.utils])
-  (:refer-clojure :exclude [* - + == / < <= > >= not= = min max])
+  (:refer-clojure :exclude [min max])
   (:require [clojure.core.matrix :refer :all]
             [clojure.core.matrix.operators :refer :all]))
 
@@ -9,10 +9,11 @@
 ; Classification is done by projecting data points onto a set of hyperplanes,
 ; the distance to which is used to determine a class membership probability.
 
-(defrecord LogReg [num-inputs num-outputs weights bias])
+(defrecord LogReg [N num-inputs num-outputs weights bias])
 
-(defn make-log-reg [n-in n-out]
-  (->LogReg n-in
+(defn make-log-reg [N n-in n-out]
+  (->LogReg N
+            n-in
             n-out
             (mapv vec (partition n-out (take (* n-out n-in) (repeat 0.0))))
             (vec (take n-out (repeat 0.0)))))
@@ -24,7 +25,12 @@
     (emap #(/ % sum) x)))
 
 (defn train [logreg x y lr]
-  (let [px|y (+ (dot x (:weights logreg)) (:bias logreg))
-        dy   (- y px|y)]
-    (println px|y)))
+  (let [f    (fn [v] (esum (add v x)))
+        px|y (emap #(+ %1 %2) (emap f (:weights logreg)) (:bias logreg))
+        dy   (sub y (softmax px|y))
+        f    (fn [[i j] v] (+ v (/ (* lr (mget dy i) (mget x j)) (:N logreg))))]
+    (-> logreg
+        (assoc :weights (emap-indexed f (:weights logreg)))
+        (assoc :bias (add (:bias logreg) (emap #(/ (* lr %) (:N logreg)) dy))))))
+
 
