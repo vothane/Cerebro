@@ -33,4 +33,7 @@
         (assoc :weights (emap-indexed f (:weights logreg)))
         (assoc :bias (add (:bias logreg) (emap #(/ (* lr %) (:N logreg)) dy))))))
 
-
+(defn predict [logreg x y]
+  (let [f (fn [v] (esum (add v x)))
+        y (emap #(+ %1 %2) (emap f (:weights logreg)) (:bias logreg))]
+    (softmax y)))

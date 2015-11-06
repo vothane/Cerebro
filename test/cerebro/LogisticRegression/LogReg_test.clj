@@ -31,3 +31,9 @@
     (let [lg (make-log-reg 6 6 2)
           lg (train lg [1 1 1 0 0 0] [1 0] 0.01)]
     (is (= (:weights lg) [])))))
+
+(deftest predict-test
+  (testing "predict"
+    (let [lg (make-log-reg 6 6 2)
+          y  (predict lg [1 1 1 0 0 0] [1 0])]
+    (is (= y [])))))
