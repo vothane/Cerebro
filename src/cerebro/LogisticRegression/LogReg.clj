@@ -12,11 +12,7 @@
 (defrecord LogReg [N num-inputs num-outputs weights bias])
 
 (defn make-log-reg [N n-in n-out]
-  (->LogReg N
-            n-in
-            n-out
-            (mapv vec (partition n-out (take (* n-out n-in) (repeat 0.0))))
-            (vec (take n-out (repeat 0.0)))))
+  (->LogReg N n-in n-out (zero-matrix n-out n-in) (zero-vector n-out)))
 
 (defn softmax [x]
   (let [max (emax x)
@@ -26,7 +22,7 @@
 
 (defn train [logreg x y lr]
   (let [f    (fn [v] (esum (add v x)))
-        px|y (emap #(+ %1 %2) (emap f (:weights logreg)) (:bias logreg))
+        px|y (add (map #(esum %) (:weights logreg)) (:bias logreg))
         dy   (sub y (softmax px|y))
         f    (fn [[i j] v] (+ v (/ (* lr (mget dy i) (mget x j)) (:N logreg))))]
     (-> logreg
@@ -35,5 +31,5 @@
 
 (defn predict [logreg x y]
   (let [f (fn [v] (esum (add v x)))
-        y (emap #(+ %1 %2) (emap f (:weights logreg)) (:bias logreg))]
+        y (add (map #(esum %) (:weights logreg)) (:bias logreg))]
     (softmax y)))

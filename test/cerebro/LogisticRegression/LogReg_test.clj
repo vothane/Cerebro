@@ -5,8 +5,8 @@
 (deftest make-log-reg-test
   (testing "logistic regression"
     (let [lg (make-log-reg 6 3 4)]
-      (is (= (:weights lg) [[0.0 0.0 0.0 0.0] [0.0 0.0 0.0 0.0] [0.0 0.0 0.0 0.0]]))
-      (is (= (:bias lg) '(0.0 0.0 0.0 0.0))))))
+      (is (= (:weights lg) [[0.0 0.0 0.0] [0.0 0.0 0.0] [0.0 0.0 0.0] [0.0 0.0 0.0]]))
+      (is (= (:bias lg) [0.0 0.0 0.0 0.0])))))
 
 (deftest softmax-test
   (testing "softmax"
@@ -29,11 +29,12 @@
 (deftest train-test
   (testing "train"
     (let [lg (make-log-reg 6 6 2)
-          lg (train lg [1 1 1 0 0 0] [1 0] 0.01)]
-    (is (= (:weights lg) [])))))
+          lg (train lg [1 1 1 0 0 0] [1 0] 0.1)]
+    (is (= (:weights lg) [[ 0.008333333333333337  0.008333333333333337  0.008333333333333337 0.0 0.0 0.0]
+                          [-0.008333333333333337 -0.008333333333333337 -0.008333333333333337 0.0 0.0 0.0]])))))
 
 (deftest predict-test
   (testing "predict"
     (let [lg (make-log-reg 6 6 2)
           y  (predict lg [1 1 1 0 0 0] [1 0])]
-    (is (= y [])))))
+    (is (= y [0.5 0.5])))))
