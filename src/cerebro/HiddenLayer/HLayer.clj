@@ -1,25 +1,11 @@
 (ns cerebro.HiddenLayer.HLayer
-  (:use [cerebro.Utils.utils])
-  (:refer-clojure :exclude [* - + == / < <= > >= not= = min max])
-  (:require [clojure.core.matrix :refer :all]
-            [clojure.core.matrix.operators :refer :all]))
+  (:use [cerebro.Utils.utils]))
 
-(defrecord HLayer [N
-	               n-inputs
-	               n-outputs
-	               weights
-	               bias])
+(defn output [input weights bias]
+	(let [linear-output (reduce + (map * weights bias))
+        linear-output (+ linear-ouput bias)]
+    (sigmoid linear-output)))
 
-(defn- rnd [] (+ (* (- 1.0 -1.0) (rand)) -1.0))
-
-(defn- uniform [min max] (* (rnd) ( + (- max min) min)))
-
-(defn make-hidden-layer [n n-in n-out]
-  (->HLayer n 
-            n-in
-            n-out 
-            (partition n-in 
-              (take (* n-in n-out) 
-                (repeatly (uniform (* -1 (/ 1 n-in)) (/ 1 n-in))))) 
-            (take b (repeat 0.0))))
-     
+(defn sample-h-given-v [hidden-layer biases input]
+  (let [n-outputs (count (first hidden-layer))]
+    (map #(binomial 1 (output hidden-layer input %1 %2)) hidden-layer biases)))
