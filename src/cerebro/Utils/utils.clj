@@ -6,5 +6,5 @@
   (let [c 0]
     (if (or (< p 0) (> p 1))
       c
-      (for [_ (range n) :let [r (rand)] :when (< r p)]
-        (inc c)))))
+      (for [_ (range n) :let [r (rand)]]
+        (if (< r p) (inc c) c)))))
