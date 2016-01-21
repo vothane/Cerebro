@@ -7,4 +7,4 @@
     (sigmoid linear-output)))
 
 (defn sample-h-given-v [hidden-layer biases input]
-  (map #(binomial 1 (output hidden-layer input %1 %2)) hidden-layer biases))
+  (map #(binomial 1 (output input %1 %2)) hidden-layer biases))
