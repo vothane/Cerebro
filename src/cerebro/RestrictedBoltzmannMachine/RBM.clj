@@ -48,6 +48,11 @@
         vbias (mapv #(+ (* lr (/ (- %1 %2) (:n rbm))) %3) inputs nv-samples (:vbias rbm))]
     (hash-map :weights weights :hbias hbias :vbias vbias)))
 
-(defn RBM-reconstruct [rbm v reconstructed-v]
-  ;IN PROGRESS
-  )
+(defn transpose [m] (mapv vector m))
+
+(defn RBM-reconstruct [rbm v]
+  (let [h (map #(RBM-propup v %1 %2) (:weights rbm) (:hbias rbm))
+        activations (map #(reduce + (map % h)) (transpose (:weights rbm)))
+        pre-sigmoid-activations(map + activations (:vbias rbm))]
+    (map sigmoid pre-sigmoid-activations)))
+  
