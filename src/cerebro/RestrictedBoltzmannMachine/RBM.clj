@@ -31,14 +31,23 @@
     (hash-map :v|h (RBM-sample-v-given-h rbm h0-sample nv-means)
               :h|v (RBM-sample-h-given-v rbm nv-samples nh-means))))
 
-(defn RBM-contrastive-divergence [rbm input lr k]
-	(let [{ph-mean :means ph-sample :samples} (RBM-sample-h-given-v rbm input)
-        {{nv-means :means nv-samples :samples} :v|h 
-         {nh-means :means nh-samples :samples} :h|v} (RBM-gibbs-hvh rbm ph-sample)
-  ; IN PROGRESS      
-        ]
-    ))
-        
+(defn RBM-contrastive-divergence [rbm inputs lr k]
+  (let [{ph-means :means
+         ph-samples :samples} (RBM-sample-h-given-v rbm inputs)
+        hvh-fn (fn [{{nh-samples :samples} :h|v}] (RBM-gibbs-hvh rbm nh-samples))
+        {{nv-means :means
+          nv-samples :samples} :v|h
+         {nh-means :means
+          nh-samples :samples} :h|v} (take k (iterate (hvh-fn (RBM-gibbs-hvh rbm ph-samples))))
+        weights (mapv
+                  #(mapv
+                     (fn [w i nvs] (+ w (/ (* lr (- (* %1 i) (* %2 nvs))) (:n rbm))))
+                     %3 inputs nv-samples)
+                  ph-means nh-means (:weights rbm))
+        hbias (mapv #(+ (* lr (/ (- %1 %2) (:n rbm))) %3) ph-samples nh-means (:hbias rbm))
+        vbias (mapv #(+ (* lr (/ (- %1 %2) (:n rbm))) %3) inputs nv-samples (:vbias rbm))]
+    (hash-map :weights weights :hbias hbias :vbias vbias)))
+
 (defn RBM-reconstruct [rbm v reconstructed-v]
   ;IN PROGRESS
   )
