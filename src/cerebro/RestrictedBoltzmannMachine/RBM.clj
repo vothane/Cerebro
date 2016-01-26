@@ -6,9 +6,8 @@
 ; to those without visible-visible and hidden-hidden connections.
 
 (defn RBM-propup [v weights bias]
-  (let [_ (println weights)
-         pre-sigmoid-activation (reduce + (map * weights v))
-        pre-sigmoid-activation (+ pre-sigmoid-activation bias)]
+  (let [pre-sigmoid-activation (reduce + (map #(dot weights %) v))
+        pre-sigmoid-activation (+ pre-sigmoid-activation (first bias))]
     (sigmoid pre-sigmoid-activation)))
 
 (defn RBM-propdown [rbm h idx bias]
@@ -17,7 +16,7 @@
     (sigmoid pre-sigmoid-activation)))
 
 (defn RBM-sample-h-given-v [rbm v0-sample]
-  (let [m (map #(RBM-propup v0-sample %1 %2) (:weights rbm) (:hbias rbm))
+  (let [m (map #(RBM-propup v0-sample %1 %2) (:weights rbm) (vector-transpose (:hbias rbm)))
         s (map #(binomial 1 %) m)]
     (hash-map :means m :samples s)))
 
@@ -49,12 +48,9 @@
         vbias (mapv #(+ (* lr (/ (- %1 %2) (:n rbm))) %3) inputs nv-samples (:vbias rbm))]
     (hash-map :weights weights :hbias hbias :vbias vbias)))
 
-(defn transpose [m]
-  (apply mapv vector m))
-
 (defn RBM-reconstruct [rbm v]
   (let [h (map #(RBM-propup v %1 %2) (:weights rbm) (:hbias rbm))
-        activations (map #(reduce + (map % h)) (transpose (:weights rbm)))
+        activations (map #(reduce + (map % h)) (matrix-transpose (:weights rbm)))
         pre-sigmoid-activations(map + activations (:vbias rbm))]
     (map sigmoid pre-sigmoid-activations)))
   

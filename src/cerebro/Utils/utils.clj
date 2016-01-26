@@ -8,3 +8,10 @@
       c
       (for [_ (range n) :let [r (rand)]]
         (if (< r p) (inc c) c)))))
+
+(defn dot [v w] (reduce + (map * v w)))
+
+(defn vector-transpose [v] (mapv vector v))
+
+(defn matrix-transpose [m]
+  (apply mapv vector m))
