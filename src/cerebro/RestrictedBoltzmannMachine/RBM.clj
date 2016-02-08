@@ -10,8 +10,9 @@
         pre-sigmoid-activation (+ pre-sigmoid-activation bias)]
     (sigmoid pre-sigmoid-activation)))
 
-(defn RBM-propdown [rbm h idx bias]
-  (let [pre-sigmoid-activation (reduce + (map #(dot (flatten (vector-transpose %)) (flatten h)) (:weights rbm)))
+(defn RBM-propdown [h W bias idx]
+  (let [weights                (nth (matrix-transpose W) idx) 
+        pre-sigmoid-activation (reduce + (map #(* %1 %2) h weights)) 
         pre-sigmoid-activation (+ pre-sigmoid-activation bias)]
     (sigmoid pre-sigmoid-activation)))
 
