@@ -2,6 +2,13 @@
   (:require [clojure.test :refer :all]
             [cerebro.RestrictedBoltzmannMachine.RBM :refer :all]))
  
+(deftest prop-up-test
+  (testing "logistic regression"
+    (let [v [0 1 1]
+          W [-3.85666 1.17140 3.71995]   
+          b -0.93577]
+      (is (= (RBM-propup v W b) 0.9812121811403206)))))
+
 (deftest make-log-reg-test
   (testing "logistic regression"
     (let [data [[1 1 1 0 0 0] 

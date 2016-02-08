@@ -6,8 +6,8 @@
 ; to those without visible-visible and hidden-hidden connections.
 
 (defn RBM-propup [v weights bias]
-  (let [pre-sigmoid-activation (reduce + (map #(dot weights %) v))
-        pre-sigmoid-activation (+ pre-sigmoid-activation (first bias))]
+  (let [pre-sigmoid-activation (reduce + (map #(* %1 %2) v weights))
+        pre-sigmoid-activation (+ pre-sigmoid-activation bias)]
     (sigmoid pre-sigmoid-activation)))
 
 (defn RBM-propdown [rbm h idx bias]
