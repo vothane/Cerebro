@@ -16,14 +16,14 @@
         pre-sigmoid-activation (+ pre-sigmoid-activation bias)]
     (sigmoid pre-sigmoid-activation)))
 
-(defn RBM-sample-h-given-v [rbm v0-sample]
-  (let [m (map #(RBM-propup v0-sample %1 %2) (:weights rbm) (vector-transpose (:hbias rbm)))
-        s (map #(binomial 1 %) m)]
-    (hash-map :means m :samples s)))
+(defn RBM-sample-h-given-v [hbias W v0-sample]
+  (let [m (mapv #(RBM-propup v0-sample %1 %2) W hbias)
+        s (mapv #(binomial 1 %) m)]
+    {:means m :samples s}))
 
 (defn RBM-sample-v-given-h [rbm h0-sample]
   (let [m (map-indexed #(RBM-propdown rbm h0-sample %1 %2) (:vbias rbm))
-        s (map #(binomial 1 %) m)]
+        s (map #(last (binomial 1 %) m))]
     (hash-map :means m :samples s)))
 
 (defn RBM-gibbs-hvh [rbm h0-sample]
