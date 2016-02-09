@@ -21,10 +21,10 @@
         s (mapv #(binomial 1 %) m)]
     {:means m :samples s}))
 
-(defn RBM-sample-v-given-h [rbm h0-sample]
-  (let [m (map-indexed #(RBM-propdown rbm h0-sample %1 %2) (:vbias rbm))
-        s (map #(last (binomial 1 %) m))]
-    (hash-map :means m :samples s)))
+(defn RBM-sample-v-given-h [vbias W h0-sample]
+  (let [m (map-indexed #(RBM-propdown h0-sample W %2 %1) vbias)
+        s (mapv #(binomial 1 %) m)]
+    {:means m :samples s}))
 
 (defn RBM-gibbs-hvh [rbm h0-sample]
   (let [{nv-means :means nv-samples :samples} (RBM-sample-v-given-h rbm h0-sample)
