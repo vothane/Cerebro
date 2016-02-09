@@ -24,21 +24,19 @@
 (defn RBM-sample-v-given-h [vbias W h0-sample]
   (let [m (map-indexed #(RBM-propdown h0-sample W %2 %1) vbias)
         s (mapv #(binomial 1 %) m)]
-    {:means m :samples s}))
+    {:means (vec m) :samples s}))
 
-(defn RBM-gibbs-hvh [rbm h0-sample]
-  (let [{nv-means :means nv-samples :samples} (RBM-sample-v-given-h rbm h0-sample)
-        {nh-means :means nh-samples :samples} (RBM-sample-h-given-v rbm nv-samples)]
-    (hash-map :v|h (RBM-sample-v-given-h rbm h0-sample)
-              :h|v (RBM-sample-h-given-v rbm nv-samples))))
+(defn RBM-gibbs-hvh [hbias vbias W h0-sample]
+  (let [s-v|h (RBM-sample-v-given-h vbias W h0-sample)]
+    {:v|h s-v|h :h|v (RBM-sample-h-given-v hbias W (:samples s-v|h))}))
 
 (defn RBM-contrastive-divergence [rbm inputs lr k]
-  (let [{ph-means :means
+  (let [{ph-means   :means
          ph-samples :samples} (RBM-sample-h-given-v rbm inputs)
         hvh-fn (fn [{{nh-samples :samples} :h|v}] (RBM-gibbs-hvh rbm nh-samples))
-        {{nv-means :means
+        {{nv-means   :means
           nv-samples :samples} :v|h
-         {nh-means :means
+         {nh-means   :means
           nh-samples :samples} :h|v} (take k (iterate hvh-fn (RBM-gibbs-hvh rbm ph-samples)))
         weights (mapv
                   #(mapv
@@ -47,7 +45,7 @@
                   ph-means nh-means (:weights rbm))
         hbias (mapv #(+ (* lr (/ (- %1 %2) (:n rbm))) %3) ph-samples nh-means (:hbias rbm))
         vbias (mapv #(+ (* lr (/ (- %1 %2) (:n rbm))) %3) inputs nv-samples (:vbias rbm))]
-    (hash-map :weights weights :hbias hbias :vbias vbias)))
+    {:weights weights :hbias hbias :vbias vbias}))
 
 (defn RBM-reconstruct [rbm v]
   (let [h (map #(RBM-propup v %1 %2) (:weights rbm) (:hbias rbm))
