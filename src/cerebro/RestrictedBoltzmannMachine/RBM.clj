@@ -31,21 +31,21 @@
     {:v|h s-v|h :h|v (RBM-sample-h-given-v hbias W (:samples s-v|h))}))
 
 (defn RBM-contrastive-divergence [rbm inputs lr k]
-  (let [{ph-means   :means
-         ph-samples :samples} (RBM-sample-h-given-v rbm inputs)
-        hvh-fn (fn [{{nh-samples :samples} :h|v}] (RBM-gibbs-hvh rbm nh-samples))
-        {{nv-means   :means
-          nv-samples :samples} :v|h
-         {nh-means   :means
-          nh-samples :samples} :h|v} (take k (iterate hvh-fn (RBM-gibbs-hvh rbm ph-samples)))
+  (let [{hbias :hbias vbias :vbias W :weights n :N} rbm
+        {ph-mean :means ph-sample :samples} (RBM-sample-h-given-v hbias W inputs)
+        {{nv-mean :means nv-sample :samples} :v|h
+         {nh-mean :means nh-sample :samples} :h|v} (reduce 
+                                                       (fn [ghvh _] 
+                                                         (RBM-gibbs-hvh hbias vbias W (:samples ghvh))) 
+                                                       (RBM-gibbs-hvh hbias vbias W ph-sample) (range k))
         weights (mapv
                   #(mapv
-                     (fn [w i nvs] (+ w (/ (* lr (- (* %1 i) (* %2 nvs))) (:n rbm))))
-                     %3 inputs nv-samples)
-                  ph-means nh-means (:weights rbm))
-        hbias (mapv #(+ (* lr (/ (- %1 %2) (:n rbm))) %3) ph-samples nh-means (:hbias rbm))
-        vbias (mapv #(+ (* lr (/ (- %1 %2) (:n rbm))) %3) inputs nv-samples (:vbias rbm))]
-    {:weights weights :hbias hbias :vbias vbias}))
+                     (fn [w i nvs] (+ w (/ (* lr (- (* (first %1) i) (* (first %2) nvs))) n)))
+                     %3 inputs nv-sample)
+                  (vector-transpose ph-mean) (vector-transpose nh-mean) W)
+        hbias (mapv #(+ (* lr (/ (- %1 %2) n)) %3) ph-sample nh-mean hbias)
+        vbias (mapv #(+ (* lr (/ (- %1 %2) n)) %3) inputs nv-sample vbias)]
+    (assoc rbm :weights weights :hbias hbias :vbias vbias)))
 
 (defn RBM-reconstruct [rbm v]
   (let [h (map #(RBM-propup v %1 %2) (:weights rbm) (:hbias rbm))
