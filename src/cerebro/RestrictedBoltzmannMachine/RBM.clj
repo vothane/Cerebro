@@ -35,14 +35,14 @@
         {ph-mean :means ph-sample :samples} (RBM-sample-h-given-v hbias W inputs)
         {{nv-mean :means nv-sample :samples} :v|h
          {nh-mean :means nh-sample :samples} :h|v} (reduce 
-                                                       (fn [ghvh _] 
-                                                         (RBM-gibbs-hvh hbias vbias W (:samples ghvh))) 
+                                                       (fn [{{nh-sample :samples} :h|v} _] 
+                                                         (RBM-gibbs-hvh hbias vbias W nh-sample)) 
                                                        (RBM-gibbs-hvh hbias vbias W ph-sample) (range k))
         weights (mapv
                   #(mapv
-                     (fn [w i nvs] (+ w (/ (* lr (- (* (first %1) i) (* (first %2) nvs))) n)))
+                     (fn [w i nvs] (+ w (/ (* lr (- (* %1 i) (* %2 nvs))) n)))
                      %3 inputs nv-sample)
-                  (vector-transpose ph-mean) (vector-transpose nh-mean) W)
+                  ph-mean nh-mean W)
         hbias (mapv #(+ (* lr (/ (- %1 %2) n)) %3) ph-sample nh-mean hbias)
         vbias (mapv #(+ (* lr (/ (- %1 %2) n)) %3) inputs nv-sample vbias)]
     (assoc rbm :weights weights :hbias hbias :vbias vbias)))
