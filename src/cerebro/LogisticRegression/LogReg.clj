@@ -18,7 +18,6 @@
                      (map + bias)
                      (softmax))
           dy    (map - y p-x|y)
-          _ (println dy)
           w     (mapv
                   (fn [w_i dy_i] 
                     (mapv
