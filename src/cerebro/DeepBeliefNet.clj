@@ -1,4 +1,6 @@
-(ns cerebro.DeepBeliefNet)
+(ns cerebro.DeepBeliefNet
+  (:use [cerebro.HiddenLayer.HLayer]
+        [cerebro.RestrictedBoltzmannMachine.RBM]))
 
 ; A deep belief network is obtained by stacking several RBMs on top of each
 ; other. The hidden layer of the RBM at layer `i` becomes the input of the
@@ -7,28 +9,25 @@
 ; used for classification, the DBN is treated as a MLP, by adding a logistic
 ; regression layer on top.
 
-(defrecord DBN [N
-	              num-inputs
-	              hidden-layer-sizes
-	              num-outputs
-	              num-layers
-	              sigmoid-layers
-	              rbm-layers
-	              log-layer])
+(defmulti sample-hidden-layers (fn [hidden-layers input] (count hidden-layers)))
 
-(defn make-dbn [n n-ins hlayer-sizes n-outs n-layers]
-  (let [sigmoid-layers (map #(make-hidden-layer n %1 %2) 
-                         (assoc (vec hlayer-sizes) 0 0)
-                         hlayer-sizes)]
-    (->DBN n 
-           n-ins 
-           hlayer-sizes
-           n-outs
-           n-layers
-           sigmoid_layers
-           (map #(make-rbm n %1 %2 (:weights %3) (:bias %3)) 
-             (assoc (vec hlayer-sizes) 0 0)
-             hlayer-sizes
-             sigmoid-layers)
-           (make-log-reg n (last hlayer-sizes) n-outs))))
-     
+(defmethod sample-hidden-layers 1 [_ input] input)
+
+(defmethod sample-hidden-layers :default [hidden-layers input]
+  (reduce (fn [s-h|v layer] (hidden-sample-h|v layer s-h|v))
+          (hidden-sample-h|v (first hidden-layers) input)
+          (rest hidden-layers)))
+
+(defn contrast-diverge-rbms [rbms hidden-layers inputs epochs lr k]
+  (map-indexed
+    (fn [idx rbm]
+      (reduce
+        (fn [rbm input] (RBM-contrastive-divergence rbm (sample-hidden-layers (take (inc idx) hidden-layers) input) lr k))
+        rbm
+        (take (* (count inputs) epochs) (cycle inputs))))
+    rbms))
+
+(defn DBN-pretrain [dbn train-x epochs lr k]
+  (let [{hidden-layers :sigmoid-layers rbms :rbm-layers} dbn
+        rbms (contrast-diverge-rbms rbms hidden-layers train-x epochs lr k)]
+    (assoc dbn :rbm-layers (vec rbms))))

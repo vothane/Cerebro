@@ -11,8 +11,6 @@
                 acc
                 (recur (dec iter) (if (< (rand) p) (inc acc) acc)))))))
 
-(defn dot [v w] (reduce + (map * v w)))
-
 (defn vector-transpose [v] (mapv vector v))
 
 (defn matrix-transpose [m]
