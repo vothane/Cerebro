@@ -27,7 +27,16 @@
         (take (* (count inputs) epochs) (cycle inputs))))
     rbms))
 
-(defn DBN-pretrain [dbn train-x epochs lr k]
+(defn DBN-pretrain [dbn train-data epochs lr k]
   (let [{hidden-layers :sigmoid-layers rbms :rbm-layers} dbn
-        rbms (contrast-diverge-rbms rbms hidden-layers train-x epochs lr k)]
+        rbms (contrast-diverge-rbms rbms hidden-layers train-data epochs lr k)]
     (assoc dbn :rbm-layers (vec rbms))))
+
+(defn finetune [dbn train-data targets epochs lr]
+  (let [{hidden-layers :sigmoid-layers log-layer :log-layer} dbn
+        data (partition 2 (interleave train-data targets))
+        logl (reduce
+               (fn [log-layer [x y]] (train log-layer (sample-hidden-layers hidden-layers x) lr))
+               log-layer
+               (take (* (count data) epochs) (cycle data)))]
+    (assoc dbn :log-layer logl)))
