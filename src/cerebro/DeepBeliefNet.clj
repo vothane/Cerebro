@@ -36,7 +36,7 @@
   (let [{hidden-layers :sigmoid-layers log-layer :log-layer} dbn
         data (partition 2 (interleave train-data targets))
         logl (reduce
-               (fn [log-layer [x y]] (train log-layer (sample-hidden-layers hidden-layers x) lr))
+               (fn [log-layer [x y]] (train log-layer (sample-hidden-layers hidden-layers x) y lr))
                log-layer
                (take (* (count data) epochs) (cycle data)))]
     (assoc dbn :log-layer logl)))
