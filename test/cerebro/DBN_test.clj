@@ -51,7 +51,11 @@
 
 (deftest dbn-pretrain-test
   (testing "DBN pretraining"
-    (let [dbn  (DBN-pretrain dbn training-data 1 0.1 1)
-          rbms (:rbm-layers dbn)]
-      (is (= rbms rbm-layer)))))
+    (let [X (transient [[0 0 1] [0 1 1] [1 0 0] [1 0 1] [0 1 1] [1 1 0] [0 0 1 1 1 0] [0 0 1 1 0 0] [0 0 1 1 1 0] [1 1 1 0 0 0] [1 0 1 0 0 0] [1 1 1 0 0 0]])]
+      (with-redefs-fn {#'sample-hidden-layers (fn [a b] 
+                                                (let [x (nth X (dec (count X))) 
+                                                      _ (when-not (= 0 (count X)) (pop! X))]
+                                                  x))}
+        #(is (= (:rbm-layers (DBN-pretrain dbn training-data 1 0.1 1)) rbm-layer))))))
+
 
