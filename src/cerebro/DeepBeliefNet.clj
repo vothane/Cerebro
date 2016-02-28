@@ -40,3 +40,14 @@
                log-layer
                (take (* (count data) epochs) (cycle data)))]
     (assoc dbn :log-layer logl)))
+
+(defn predict [dbn x]
+  (let [{sigmoid-layers :sigmoid-layers log-layer :log-layer} dbn
+        linear-output (reduce (fn [input layer] (activation layer input))
+                              (activation (first sigmoid-layers) x)
+                              (rest sigmoid-layers))
+        activate      (fn [inputs weights] (reduce + inputs weights))
+        output        (map #(activate linear-output %) (:weights log-layer))
+        bias-out      (map + output (:bias log-layer))]
+    (map softmax bias-out)))
+
