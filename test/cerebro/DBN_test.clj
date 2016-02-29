@@ -24,7 +24,7 @@
                      [-0.1938654179145095  0.1287133626717507   -0.06540140494644048]] 
                  :hbias [0 0 0] 
                  :vbias [0 0 0]}] 
-   :log-layer {:W [[0 0 0] [0 0 0]] :bias [0 0] :N 6}
+   :log-layer {:weights [[0 0 0] [0 0 0]] :bias [0 0] :N 6}
   })
 
 (def training-features
@@ -60,7 +60,6 @@
 (deftest DBN-test
   (testing "DBN should make accurate predictions after training"
     (let [dbn (DBN-pretrain dbn training-features 1000 0.1 1)
-          dbn (finetune dbn training-features training-predictors 500 0.1)
-          ];_ (println (predict dbn [1 1 0 0 0 0]))]
+          dbn (finetune dbn training-features training-predictors 500 0.1)]
       (is (= (predict dbn [1 1 0 0 0 0]) "This will always fail.")))))
 

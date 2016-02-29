@@ -47,9 +47,8 @@
         linear-output (reduce (fn [input layer] (activation layer input))
                               (activation (first sigmoid-layers) x)
                               (rest sigmoid-layers))
-        _ (println linear-output)
-        activate      (fn [inputs weights] (reduce + inputs weights))
+        activate      (fn [inputs weights] (reduce + (map * inputs weights)))
         output        (map #(activate linear-output %) (:weights log-layer))
         bias-out      (map + output (:bias log-layer))]
-    (map softmax bias-out)))
+    (softmax bias-out)))
 

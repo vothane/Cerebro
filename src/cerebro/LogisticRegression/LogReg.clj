@@ -13,7 +13,7 @@
     (map #(/ % s) x)))
 
 (defn train [logreg x y lr]
-    (let [{weights :W bias :bias n :N} logreg
+    (let [{weights :weights bias :bias n :N} logreg
           p-x|y (->> (map #(reduce + (map * x %)) weights)
                      (map + bias)
                      (softmax))
@@ -25,4 +25,4 @@
                       w_i x))
                   weights dy)
           b     (mapv (fn [bias_i dy_i] (+ bias_i (* lr (/ dy_i n)))) bias dy)]
-      (assoc logreg :W w :bias b)))
+      (assoc logreg :weights w :bias b)))
