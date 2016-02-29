@@ -7,13 +7,13 @@
     (sigmoid linear-output)))
 
 (defn hidden-sample-h|v [hidden-layer inputs]
-  (let [{weights :W bias :bias} hidden-layer]
+  (let [{weights :weights bias :bias} hidden-layer]
     (mapv (fn [w_i b_i] (binomial 1 (output inputs w_i b_i))) weights bias)))
 
 (defn activation [layer input]
-  (let [{W :weights bias :bias} layer
-        activate (fn [inputs weights] (reduce + inputs weights))
-        output   (map #(activate input %) W)
+  (let [{weights :weights bias :bias} layer
+        activate (fn [i w] (reduce + (map * i w)))
+        output   (map #(activate input %) weights)
         bias-out (map + output bias)]
     (map sigmoid bias-out)))
 
