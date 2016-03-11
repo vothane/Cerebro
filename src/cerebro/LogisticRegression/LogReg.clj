@@ -24,5 +24,5 @@
                       (fn [w_ij x_j] (+ w_ij (* lr dy_i (/ x_j n))))
                       w_i x))
                   weights dy)
-          b     (mapv (fn [bias_i dy_i] (+ bias_i (* lr (/ dy_i n)))) bias dy)]
+          b     (mapv (fn [bias_i dy_i] (+ bias_i (/ (* lr dy_i) n))) bias dy)]
       (assoc logreg :weights w :bias b)))
