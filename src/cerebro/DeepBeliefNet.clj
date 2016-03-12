@@ -28,10 +28,13 @@
         (take (* (count inputs) epochs) (cycle inputs))))
     rbms))
 
+(defn sync-layers [to from]
+  (mapv #(assoc %1 :weights (:weights %2) :bias (:hbias %2)) to from))
+
 (defn DBN-pretrain [dbn train-data epochs lr k]
   (let [{hidden-layers :sigmoid-layers rbms :rbm-layers} dbn
         rbms (contrast-diverge-rbms rbms hidden-layers train-data epochs lr k)]
-    (assoc dbn :rbm-layers (vec rbms))))
+    (assoc dbn :rbm-layers (vec rbms) :sigmoid-layers (sync-layers hidden-layers rbms))))
 
 (defn finetune [dbn train-data targets epochs lr]
   (let [{hidden-layers :sigmoid-layers log-layer :log-layer} dbn
