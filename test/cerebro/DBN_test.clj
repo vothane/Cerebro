@@ -57,9 +57,29 @@
    [0 1]
    [0 1]])
 
+(def sigmoid-layers [{:weights [[3.830040562610957 2.2572438689428482 1.1291324614561007 -4.0898381940839315 -2.9943059764521114 -1.4455110000150806] 
+                               [-0.23531638963814172 -0.7089522379361282 2.0373878851804412 0.5388205984585597 0.00909457901571344 -1.4625908870311244] 
+                               [-2.9787234309856543 -2.5183288604959335 0.9839791764425729 2.7849715512720685 1.579416020412225 -1.4473204127308446]] 
+                     :bias [-0.5889345615736271 0.21725896752865348 -0.5106834878093905]} 
+                     {:weights [[2.2679914975465905 -0.032221378861459635 -2.3239115409314617] 
+                                [0.7196361212711985 0.3531154380197722 -0.698710183627769] 
+                                [-3.856656951090344 1.1713952667178291 3.7199477886071834]] 
+                      :bias [0.026740498859828266 -0.09725689788213573 -0.9354588375656511]}])
+
+(def log-layer {:weights [[1.362310331208894 0.4118738320958368 -2.1298562224417825] 
+                          [-1.362310331208894 -0.4118738320958366 2.1298562224417825]] 
+                :bias [0.17633688988848428 -0.17633688988848387]
+                :N 6})
+
+(deftest DBN-predict-test
+  (testing "DBN should make accurate predictions with mocked sigmoid and log layers"
+    (let [dbn (assoc dbn :sigmoid-layers sigmoid-layers :log-layer log-layer)]
+      (is (= (predict dbn [1 1 0 0 0 0]) [0.9653090289791912 0.03469097102080875])))))
+
 (deftest DBN-test
   (testing "DBN should make accurate predictions after training"
     (let [dbn (DBN-pretrain dbn training-features 1000 0.1 1)
           dbn (finetune dbn training-features training-predictors 500 0.1)
           dbn (assoc dbn :sigmoid-layers sigmoid-layers :log-layer log-layer)]
       (is (= (predict dbn [1 1 0 0 0 0]) "This will always fail.")))))
+
