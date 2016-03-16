@@ -16,12 +16,12 @@
     (let [{weights :weights bias :bias n :N} logreg
           p-x|y (->> (map #(reduce + (map * x %)) weights)
                      (map + bias)
-                     (softmax))
+                     (softmax)) 
           dy    (map - y p-x|y)
           w     (mapv
                   (fn [w_i dy_i] 
                     (mapv
-                      (fn [w_ij x_j] (+ w_ij (* lr dy_i (/ x_j n))))
+                      (fn [w_ij x_j] (+ w_ij (/ (* lr dy_i x_j) n)))
                       w_i x))
                   weights dy)
           b     (mapv (fn [bias_i dy_i] (+ bias_i (/ (* lr dy_i) n))) bias dy)]

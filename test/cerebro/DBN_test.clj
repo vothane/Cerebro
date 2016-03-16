@@ -60,6 +60,6 @@
 (deftest DBN-test
   (testing "DBN should make accurate predictions after training"
     (let [dbn (DBN-pretrain dbn training-features 1000 0.1 1)
-          dbn (finetune dbn training-features training-predictors 500 0.1) _ (println dbn)]
+          dbn (finetune dbn training-features training-predictors 500 0.1)
+          dbn (assoc dbn :sigmoid-layers sigmoid-layers :log-layer log-layer)]
       (is (= (predict dbn [1 1 0 0 0 0]) "This will always fail.")))))
-
