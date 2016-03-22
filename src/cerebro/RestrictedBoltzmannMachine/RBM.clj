@@ -39,11 +39,15 @@
                                                          (RBM-gibbs-hvh hbias vbias W nh-sample)) 
                                                        (RBM-gibbs-hvh hbias vbias W ph-sample) (range k))
         weights (mapv
-                  #(mapv
-                     (fn [w i nvs] (+ w (/ (* lr (- (* %1 i) (* %2 nvs))) n)))
-                     %3 inputs nv-sample)
+                  (fn [ph-mean_i nh-mean_i W_i] 
+                    (mapv
+                      (fn [W_ij nv-sample_j inputs_j] (+ W_ij (/ (* lr (- (* ph-mean_i inputs_j) (* nh-mean_i nv-sample_j))) n)))
+;this.W[i][j] += lr * (ph_mean[i] * float64(input[j]) - nh_means[i] * float64(nv_samples[j])) / float64(this.N)
+                      W_i nv-sample inputs))
                   ph-mean nh-mean W)
-        hbias (mapv #(+ (* lr (/ (- %1 %2) n)) %3) ph-sample nh-mean hbias)
-        vbias (mapv #(+ (* lr (/ (- %1 %2) n)) %3) inputs nv-sample vbias)]
+        hbias (mapv #(+ (/ (* lr (- %1 %2)) n) %3) ph-sample nh-mean hbias)
+        ;this.hbias[i] += lr * (float64(ph_sample[i]) - nh_means[i]) / float64(this.N)
+        vbias (mapv #(+ (/ (* lr (- %1 %2)) n) %3) inputs nv-sample vbias)]
+        ;this.vbias[i] += lr * float64(input[i] - nv_samples[i]) / float64(this.N)
     (assoc rbm :weights weights :hbias hbias :vbias vbias)))
 
