@@ -1,6 +1,10 @@
 (ns cerebro.HiddenLayer.HLayer
   (:use [cerebro.Utils.utils]))
 
+(defn HiddenLayer [w b]
+  {:weights w
+   :bias b})
+
 (defn output [inputs weights bias]
   (let [linear-output (reduce + (map * inputs weights))
         linear-output (+ linear-output bias)]
