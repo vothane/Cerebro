@@ -10,48 +10,42 @@
 ; used for classification, the DBN is treated as a MLP, by adding a logistic
 ; regression layer on top.
 
-(defmulti sample-hidden-layers (fn [hidden-layers input] (count hidden-layers)))
+(declare contrast-diverge-rbms)
 
-(defmethod sample-hidden-layers 1 [_ input] input)
+(defn DBN [W sigs rbms logs] 
+  {:shared-weights W
+   :sigmoid-layers (reduce #(assoc %1 :weights %2) sigs W)
+   :rbm-layers (reduce #(assoc %1 :weights %2) rbms W)
+   :log-layers logs
 
-(defmethod sample-hidden-layers :default [hidden-layers input]
-  (reduce (fn [s-h|v layer] (hidden-sample-h|v layer s-h|v))
-          (hidden-sample-h|v (first hidden-layers) input)
-          (rest hidden-layers)))
+   :pretrain (fn [train-X epochs lr k]
+               (let [rbms (contrast-diverge-rbms :rbm-layers :sigmoid-layers train-X epochs lr k)]
+                 (DBN (:weights rbms) :sigmoid-layers :rbm-layers :log-layers)))
 
-(defn contrast-diverge-rbms [rbms hidden-layers inputs epochs lr k]
-  (map-indexed
-    (fn [idx rbm]
-      (reduce
-        (fn [rbm input] (RBM-contrastive-divergence rbm (sample-hidden-layers (take (inc idx) hidden-layers) input) lr k))
-        rbm
-        (take (* (count inputs) epochs) (cycle inputs))))
-    rbms))
+   :finetune (fn finetune [train-X targets epochs lr]
+               (let [data (partition 2 (interleave train-X targets))
+                     logl (reduce
+                            (fn [log-layer [x y]] (train log-layer (sample-hidden-layers hidden-layers x) y lr))
+                            log-layer
+                            (take (* (count data) epochs) (cycle data)))]
+                 (DBN :shared-weights :sigmoid-layers :rbm-layers logl)))
 
-(defn sync-layers [to from]
-  (mapv #(assoc %1 :weights (:weights %2) :bias (:hbias %2)) to from))
-
-(defn DBN-pretrain [dbn train-data epochs lr k]
-  (let [{hidden-layers :sigmoid-layers rbms :rbm-layers} dbn
-        rbms (contrast-diverge-rbms rbms hidden-layers train-data epochs lr k)]
-    (assoc dbn :rbm-layers (vec rbms) :sigmoid-layers (sync-layers hidden-layers rbms))))
-
-(defn finetune [dbn train-data targets epochs lr]
-  (let [{hidden-layers :sigmoid-layers log-layer :log-layer} dbn
-        data (partition 2 (interleave train-data targets))
-        logl (reduce
-               (fn [log-layer [x y]] (train log-layer (sample-hidden-layers hidden-layers x) y lr))
-               log-layer
-               (take (* (count data) epochs) (cycle data)))]
-    (assoc dbn :log-layer logl)))
-
-(defn predict [dbn x]
-  (let [{sigmoid-layers :sigmoid-layers log-layer :log-layer} dbn
-        linear-output (reduce (fn [input layer] (activation layer input))
-                              (activation (first sigmoid-layers) x)
-                              (rest sigmoid-layers))
-        activate      (fn [inputs weights] (reduce + (map * inputs weights)))
-        output        (map #(activate linear-output %) (:weights log-layer))
-        bias-out      (map + output (:bias log-layer))]
-    (softmax bias-out)))
-
+   :predict (fn predict [dbn x]
+              (let [linear-output (reduce (fn [input layer] (activation layer input))
+                                          (activation (first :sigmoid-layers) x)
+                                          (rest :sigmoid-layers))
+                    activate (fn [inputs weights] (reduce + (map * inputs weights)))
+                    output (map #(activate linear-output %) (:weights :log-layers))
+                    bias-out (map + output (:bias :log-layers))]
+                (softmax bias-out))))
+  })  
+   
+    ;; helper functions for DBN
+    (defn contrast-diverge-rbms [rbms hidden-layers inputs epochs lr k]
+      (map-indexed
+        (fn [idx rbm]
+          (reduce
+            (fn [rbm input] (RBM-contrastive-divergence rbm (sample-hidden-layers (take (inc idx) hidden-layers) input) lr k))
+            rbm
+            (take (* (count inputs) epochs) (cycle inputs))))
+        rbms))
