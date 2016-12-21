@@ -18,8 +18,8 @@
    :rbm-layers (reduce #(assoc %1 :weights %2) rbms W)
    :log-layers logs
 
-   :pretrain (fn [train-X epochs lr k]
-               (let [rbms (contrast-diverge-rbms :rbm-layers :sigmoid-layers train-X epochs lr k)]
+   :pretrain (fn [X-train epochs lr k]
+               (let [rbms (contrast-diverge-rbms :rbm-layers :sigmoid-layers X-train epochs lr k)]
                  (DBN (:weights rbms) :sigmoid-layers :rbm-layers :log-layers)))
 
    :finetune (fn finetune [train-X targets epochs lr]
@@ -40,12 +40,14 @@
                 (softmax bias-out))))
   })  
    
+    (declare sample-inputs)
+
     ;; helper functions for DBN
-    (defn contrast-diverge-rbms [rbms hidden-layers inputs epochs lr k]
-      (map-indexed
-        (fn [idx rbm]
-          (reduce
-            (fn [rbm input] (RBM-contrastive-divergence rbm (sample-hidden-layers (take (inc idx) hidden-layers) input) lr k))
-            rbm
-            (take (* (count inputs) epochs) (cycle inputs))))
-        rbms))
+    (defn contrast-diverge-rbms [rbms hidden-layers X-train epochs lr k]
+      (let [inputs (sample-inputs hidden-layers X-train)
+            con-div (fn [rbm] ((:contrastive-divergence rbm) inputs lr k))] 
+        (mapv #(con-div %) rbms)))
+
+        ;; helper functions for contrast-diverge-rbms
+        (defn sample-inputs [hidden-layers train-X]
+          (reduce #(conj %1 sample-hidden-layers %2) (vec train-X) hidden-layers))
