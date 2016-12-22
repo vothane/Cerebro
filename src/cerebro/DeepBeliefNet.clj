@@ -23,12 +23,8 @@
                  (DBN (:weights rbms) :sigmoid-layers :rbm-layers :log-layers)))
 
    :finetune (fn finetune [train-X targets epochs lr]
-               (let [data (partition 2 (interleave train-X targets))
-                     logl (reduce
-                            (fn [log-layer [x y]] (train log-layer (sample-hidden-layers hidden-layers x) y lr))
-                            log-layer
-                            (take (* (count data) epochs) (cycle data)))]
-                 (DBN :shared-weights :sigmoid-layers :rbm-layers logl)))
+               (let [logs (train-logs :log-layers :sigmoid-layers X-train Y-train epochs lr)]
+                 (DBN :shared-weights :sigmoid-layers :rbm-layers logs)))
 
    :predict (fn predict [dbn x]
               (let [linear-output (reduce (fn [input layer] (activation layer input))
@@ -41,14 +37,25 @@
   })  
    
     (declare sample-inputs)
+    (declare cycle-epochs)
 
     ;; helper functions for DBN
     (defn contrast-diverge-rbms [rbms hidden-layers X-train epochs lr k]
       (let [inputs (sample-inputs hidden-layers X-train)
-            con-div (fn [rbm] ((:contrastive-divergence rbm) inputs lr k))
-            cycle-epochs (fn [rbm] (reduce #(con-div rbm) rbm (range epochs)))] 
-        (mapv #(cycle-epochs %) rbms)))
+            con-div (fn [rbm] ((:contrastive-divergence rbm) inputs lr k))] 
+        (mapv #(cycle-epochs % epochs con-div) rbms)))
+  
+    (defn train-logs [logs hidden-layers X-train Y-train epochs lr]
+      (let [inputs (sample-inputs hidden-layers X-train)
+            train-log (fn [log] ((:train log) inputs Y-train lr))] 
+        (mapv #(cycle-epochs % epochs train-log) logs)))
 
-        ;; helper functions for contrast-diverge-rbms
+        ;; helper functions
         (defn sample-inputs [hidden-layers train-X]
           (reduce #(conj %1 sample-hidden-layers %2) (vec train-X) hidden-layers))
+
+        (defn cycle-epochs (fn [domain epochs f] 
+          (reduce #(f domain) domain (range epochs))))
+
+
+       
