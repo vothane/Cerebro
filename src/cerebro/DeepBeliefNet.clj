@@ -20,7 +20,7 @@
 
    :pretrain (fn [X-train epochs lr k]
                (let [rbms (contrast-diverge-rbms :rbm-layers :sigmoid-layers X-train epochs lr k)]
-                 (DBN (:weights rbms) :sigmoid-layers :rbm-layers :log-layers)))
+                 (DBN (:weights rbms) :sigmoid-layers rbms :log-layers)))
 
    :finetune (fn finetune [train-X targets epochs lr]
                (let [logs (train-logs :log-layers :sigmoid-layers X-train Y-train epochs lr)]
@@ -50,12 +50,12 @@
             train-log (fn [log] ((:train log) inputs Y-train lr))] 
         (mapv #(cycle-epochs % epochs train-log) logs)))
 
-        ;; helper functions
+        ;; helper functions for DBN helper functions
         (defn sample-inputs [hidden-layers train-X]
           (reduce #(conj %1 sample-hidden-layers %2) (vec train-X) hidden-layers))
 
         (defn cycle-epochs (fn [domain epochs f] 
-          (reduce #(f domain) domain (range epochs))))
+          (reduce (fn [domain _] (f domain)) domain (range epochs))))
 
 
        
