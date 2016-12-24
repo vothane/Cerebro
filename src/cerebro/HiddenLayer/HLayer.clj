@@ -1,6 +1,9 @@
 (ns cerebro.HiddenLayer.HLayer
   (:use [cerebro.Utils.utils]))
 
+
+(declare output)
+
 (defn HiddenLayer [w b]
   {:weights w
    :bias b
@@ -10,13 +13,10 @@
                        output   (map #(activate input %) :weights)
                        bias-out (map + output :bias)]
                    (map sigmoid bias-out)))
+
+   :sample-h-given-v (fn [inputs]
+                       (mapv (fn [w_i b_i] (binomial 1 (output inputs w_i b_i))) :weights :bias))
   })
-
-(declare output)
-
-(defn hidden-sample-h|v [hidden-layer inputs]
-  (let [{weights :weights bias :bias} hidden-layer]
-    (mapv (fn [w_i b_i] (binomial 1 (output inputs w_i b_i))) weights bias)))
      
     ;; helper functions 
     (defn output [inputs weights bias]

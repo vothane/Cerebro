@@ -38,7 +38,6 @@
    
     (declare sample-inputs)
     (declare cycle-epochs)
-
     ;; helper functions for DBN
     (defn contrast-diverge-rbms [rbms hidden-layers X-train epochs lr k]
       (let [inputs (sample-inputs hidden-layers X-train)
@@ -49,6 +48,9 @@
       (let [inputs (sample-inputs hidden-layers X-train)
             train-log (fn [log] ((:train log) inputs Y-train lr))] 
         (mapv #(cycle-epochs % epochs train-log) logs)))
+       
+        
+       (declare sample-hidden-layers)
 
         ;; helper functions for DBN helper functions
         (defn sample-inputs [hidden-layers train-X]
@@ -57,5 +59,12 @@
         (defn cycle-epochs (fn [domain epochs f] 
           (reduce (fn [domain _] (f domain)) domain (range epochs))))
 
+        (defmulti sample-hidden-layers (fn [hidden-layers input] (count hidden-layers)))
 
+        (defmethod sample-hidden-layers 1 [_ input] input)
+
+        (defmethod sample-hidden-layers :default [hidden-layers input]
+          (reduce (fn [s-h|v layer] ((:sample-h-given-v layer) s-h|v))
+                  ((:sample-h-given-v (first hidden-layers)) input)
+                  (rest hidden-layers)))
        
