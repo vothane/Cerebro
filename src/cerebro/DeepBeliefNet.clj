@@ -26,9 +26,9 @@
                (let [logs (train-logs :log-layers :sigmoid-layers X-train Y-train epochs lr)]
                  (DBN :shared-weights :sigmoid-layers :rbm-layers logs)))
 
-   :predict (fn predict [dbn x]
-              (let [linear-output (reduce (fn [input layer] (activation layer input))
-                                          (activation (first :sigmoid-layers) x)
+   :predict (fn predict [x]
+              (let [linear-output (reduce (fn [input layer] ((:activation layer) input))
+                                          ((:activation (first :sigmoid-layers)) x)
                                           (rest :sigmoid-layers))
                     activate (fn [inputs weights] (reduce + (map * inputs weights)))
                     output (map #(activate linear-output %) (:weights :log-layers))
