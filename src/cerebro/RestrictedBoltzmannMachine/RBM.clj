@@ -5,27 +5,34 @@
 ; contain hidden variables. Restricted Boltzmann Machines further restrict BMs
 ; to those without visible-visible and hidden-hidden connections.
 
+;; API functions
+
+(defn RBM-contrastive-divergence [rbm inputs lr k] ((:contrastive-divergence rbm) inputs lr k))
+
+
+(declare RBM-sample-h-given-v)
+(declare RBM-gibbs-hvh)
+
 (defn RBM [w hb vb n]
   {:weights w
    :hbias hb 
    :vbias vb
-   :vbias
-   :N n
+   
    :contrastive-divergence (fn [inputs lr k]
                              (let [{ph-mean :means ph-sample :samples} (RBM-sample-h-given-v :hbias :weights inputs)
                                    {{nv-mean :means nv-sample :samples} :v|h
                                     {nh-mean :means nh-sample :samples} :h|v} (reduce 
                                                                                   (fn [{{nh-sample :samples} :h|v} _] 
-                                                                                    (RBM-gibbs-hvh hbias vbias W nh-sample)) 
-                                                                                  (RBM-gibbs-hvh hbias vbias W ph-sample) (range k))
+                                                                                    (RBM-gibbs-hvh :hbias :vbias :weights nh-sample)) 
+                                                                                  (RBM-gibbs-hvh :hbias :vbias :weights ph-sample) (range k))
                                    weights (mapv
                                              (fn [ph-mean_i nh-mean_i W_i] 
                                                (mapv
                                                  (fn [W_ij nv-sample_j inputs_j] (+ W_ij (/ (* lr (- (* ph-mean_i inputs_j) (* nh-mean_i nv-sample_j))) n)))
                                                  W_i nv-sample inputs))
-                                             ph-mean nh-mean W)
-                                   hbias (mapv #(+ (/ (* lr (- %1 %2)) n) %3) ph-sample nh-mean hbias)
-                                   vbias (mapv #(+ (/ (* lr (- %1 %2)) n) %3) inputs nv-sample vbias)]
+                                             ph-mean nh-mean :weights)
+                                   hbias (mapv #(+ (/ (* lr (- %1 %2)) n) %3) ph-sample nh-mean :hbias)
+                                   vbias (mapv #(+ (/ (* lr (- %1 %2)) n) %3) inputs nv-sample :vbias)]
                                (RBM weights hbias vbias :N)))
   })
 
