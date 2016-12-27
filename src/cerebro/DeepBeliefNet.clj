@@ -10,6 +10,12 @@
 ; used for classification, the DBN is treated as a MLP, by adding a logistic
 ; regression layer on top.
 
+
+;; API functions
+(defn predict [dbn x] ((:predict dbn) x))
+(defn dbn->map [dbn] ((:->map dbn)))
+
+
 (declare contrast-diverge-rbms)
 
 (defn DBN [weights sigmoid-layers rbm-layers log-layers] 
@@ -29,6 +35,8 @@
                     output (map #(activate linear-output %) (weights log-layers))
                     bias-out (map + output (:bias log-layers))]
                 (softmax bias-out))))
+
+   :->map (fn [] {:weights weights :sigmoid-layers sigmoid-layers :rbm-layers rbm-layers :log-layers log-layers})
   })  
    
     (declare sample-inputs)

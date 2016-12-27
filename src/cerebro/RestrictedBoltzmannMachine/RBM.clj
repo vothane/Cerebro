@@ -6,7 +6,6 @@
 ; to those without visible-visible and hidden-hidden connections.
 
 ;; API functions
-
 (defn RBM-contrastive-divergence [rbm inputs lr k] ((:contrastive-divergence rbm) inputs lr k))
 
 
