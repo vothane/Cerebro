@@ -80,4 +80,4 @@
                                                 :samples [1 1 1 0 1 1]} 
                                           :h|v {:means [0.5002654282727627 0.5362803729362655 0.5020035125943747]
                                                 :samples [0 1 0]}})}
-        #(is (= (RBM-contrastive-divergence init-rbm [1 1 1 0 0 0] 0.1 1) real-rbm))))))
+        #(is (= (contrastive-divergence init-rbm [1 1 1 0 0 0] 0.1 1) real-rbm))))))

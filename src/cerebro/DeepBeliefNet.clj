@@ -44,7 +44,7 @@
     ;; helper functions for DBN
     (defn contrast-diverge-rbms [rbms hidden-layers X-train epochs lr k]
       (let [inputs (sample-inputs hidden-layers X-train)
-            con-div (fn [rbm] ((:contrastive-divergence rbm) inputs lr k))] 
+            con-div (fn [rbm] (contrastive-divergence rbm inputs lr k))] 
         (mapv #(cycle-epochs % epochs con-div) rbms)))
   
     (defn train-logs [logs hidden-layers X-train Y-train epochs lr]
