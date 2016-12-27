@@ -17,8 +17,7 @@
                          [0.008333333333333333 -0.008333333333333333]
                         6)
           trained     (train init-logreg [1 1 0] [1 0] 0.1)]  
-    (is (= 1 1)))))                           
-    ;(is (= (logreg->map trained) (logreg->map real-logreg))))))
+    (is (= (logreg->map trained) (logreg->map real-logreg))))))
 
 (deftest train-test
   (testing "train with one pass through of calculations"
