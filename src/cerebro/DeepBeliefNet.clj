@@ -12,27 +12,22 @@
 
 (declare contrast-diverge-rbms)
 
-(defn DBN [W sigs rbms logs] 
-  {:shared-weights W
-   :sigmoid-layers (reduce #(assoc %1 :weights %2) sigs W)
-   :rbm-layers (reduce #(assoc %1 :weights %2) rbms W)
-   :log-layers logs
-
-   :pretrain (fn [X-train epochs lr k]
-               (let [rbms (contrast-diverge-rbms :rbm-layers :sigmoid-layers X-train epochs lr k)]
-                 (DBN (:weights rbms) :sigmoid-layers rbms :log-layers)))
+(defn DBN [weights sigmoid-layers rbm-layers log-layers] 
+  {:pretrain (fn [X-train epochs lr k]
+               (let [rbms (contrast-diverge-rbms rbm-layers sigmoid-layers X-train epochs lr k)]
+                 (DBN (weights rbms) sigmoid-layers rbms log-layers)))
 
    :finetune (fn finetune [train-X targets epochs lr]
-               (let [logs (train-logs :log-layers :sigmoid-layers X-train Y-train epochs lr)]
-                 (DBN :shared-weights :sigmoid-layers :rbm-layers logs)))
+               (let [logs (train-logs log-layers sigmoid-layers X-train Y-train epochs lr)]
+                 (DBN weights sigmoid-layers rbm-layers logs)))
 
    :predict (fn predict [x]
               (let [linear-output (reduce (fn [input layer] ((:activation layer) input))
-                                          ((:activation (first :sigmoid-layers)) x)
-                                          (rest :sigmoid-layers))
+                                          ((:activation (first sigmoid-layers)) x)
+                                          (rest sigmoid-layers))
                     activate (fn [inputs weights] (reduce + (map * inputs weights)))
-                    output (map #(activate linear-output %) (:weights :log-layers))
-                    bias-out (map + output (:bias :log-layers))]
+                    output (map #(activate linear-output %) (weights log-layers))
+                    bias-out (map + output (:bias log-layers))]
                 (softmax bias-out))))
   })  
    
