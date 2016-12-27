@@ -4,18 +4,15 @@
 
 (declare output)
 
-(defn HiddenLayer [w b]
-  {:weights w
-   :bias b
-
-   :activation (fn [layer input]
+(defn HiddenLayer [weights bias]
+  {:activation (fn [layer input]
                  (let [activate (fn [i w] (reduce + (map * i w)))
-                       output   (map #(activate input %) :weights)
-                       bias-out (map + output :bias)]
+                       output   (map #(activate input %) weights)
+                       bias-out (map + output bias)]
                    (map sigmoid bias-out)))
 
    :sample-h-given-v (fn [inputs]
-                       (mapv (fn [w_i b_i] (binomial 1 (output inputs w_i b_i))) :weights :bias))
+                       (mapv (fn [w_i b_i] (binomial 1 (output inputs w_i b_i))) weights bias))
   })
      
     ;; helper functions 

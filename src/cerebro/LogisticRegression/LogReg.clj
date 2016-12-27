@@ -6,16 +6,18 @@
 ; Classification is done by projecting data points onto a set of hyperplanes,
 ; the distance to which is used to determine a class membership probability.
 
+;; API functions
+(defn train [logreg x y lr] ((:train logreg) x y lr))
+(defn logreg->map [logreg] (reduce (fn [m [k v]] (when-not (clojure.test/function? v) (assoc m k v))) {} logreg))
+
+
 (declare softmax)
 
-(defn LogReg [w b n]
-  {:weights w
-   :bias b
-   :N n
-   :train (fn [x y lr]
+(defn LogReg [weights bias n]
+  {:train (fn [x y lr]
             (let [p-x|y (->> (map #(reduce + (map * x %)) weights)
-                         (map + bias)
-                         (softmax)) 
+                             (map + bias)
+                             (softmax)) 
                   dy    (map - y p-x|y)
                   w     (mapv
                           (fn [w_i dy_i] 
@@ -23,11 +25,12 @@
                               (fn [w_ij x_j] (+ w_ij (/ (* lr dy_i x_j) n)))
                               w_i x))
                           weights dy)
-                  b     (mapv (fn [bias_i dy_i] (+ bias_i (/ (* lr dy_i) n))) bias dy)])
-          (LogReg w b :N))})
+                  b     (mapv (fn [bias_i dy_i] (+ bias_i (/ (* lr dy_i) n))) bias dy)]
+          (LogReg w b n)))
+  })
 
     ;; LogReg helper functions
-    (defn- softmax [x]
+    (defn softmax [x]
       (let [m (apply max x)
             x (map #(Math/exp (- % m)) x)
             s (reduce + x)]
