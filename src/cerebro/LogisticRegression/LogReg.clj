@@ -8,7 +8,7 @@
 
 ;; API functions
 (defn train [logreg x y lr] ((:train logreg) x y lr))
-(defn logreg->map [logreg] ((:->map logreg)))
+(defn logreg->map [logreg] (:->map logreg))
 
 
 (declare softmax)
@@ -28,7 +28,7 @@
                   b     (mapv (fn [bias_i dy_i] (+ bias_i (/ (* lr dy_i) n))) bias dy)]
           (LogReg w b n)))
 
-   :->map (fn [] {:weights weights :bias bias :n n})
+   :->map {:weights weights :bias bias :n n}
   })
 
     ;; LogReg helper functions

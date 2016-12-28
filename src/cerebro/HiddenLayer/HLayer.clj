@@ -1,11 +1,13 @@
 (ns cerebro.HiddenLayer.HLayer
   (:use [cerebro.Utils.utils]))
 
+;; API functions
+(defn activation [sigmoid input] ((:activation sigmoid) input))
 
 (declare output)
 
 (defn HiddenLayer [weights bias]
-  {:activation (fn [layer input]
+  {:activation (fn [input]
                  (let [activate (fn [i w] (reduce + (map * i w)))
                        output   (map #(activate input %) weights)
                        bias-out (map + output bias)]
