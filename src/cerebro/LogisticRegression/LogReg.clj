@@ -36,4 +36,4 @@
       (let [m (apply max x)
             x (map #(Math/exp (- % m)) x)
             s (reduce + x)]
-        (map #(/ % s) x)))
+        (mapv #(/ % s) x)))

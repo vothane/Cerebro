@@ -35,13 +35,10 @@
               (let [linear-output (reduce (fn [input layer] (activation layer input))
                                           (activation (first sigmoid-layers) x)
                                           (rest sigmoid-layers))
-                    activate (fn [inputs weights] (map #(dot-product inputs %) weights))
-                    output (map #(activate linear-output (:weights (logreg->map %))) log-layers)
-                    bias-out (map + output (:bias log-layers))
-                    _ (println "-----------output-----------") _ (println bias-out) _ (println "-----------output-----------")                    
-                   
-                    ]
-                (softmax bias-out)))
+                    activate (fn [inputs weights] (mapv #(dot-product inputs %) weights))
+                    output (mapv #(activate linear-output (:weights (logreg->map %))) log-layers)
+                    bias-out (mapv #(mapv + %1 (:bias (logreg->map %2))) output log-layers)]
+                (mapv #(softmax %) bias-out)))
 
    :->map {:sigmoid-layers sigmoid-layers :rbm-layers rbm-layers :log-layers log-layers}
   })  

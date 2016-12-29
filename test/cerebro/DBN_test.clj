@@ -20,7 +20,7 @@
 (def rbm-layers [(RBM (first weights) [0 0 0] [0 0 0 0 0 0] 6) 
                  (RBM (last weights) [0 0 0] [0 0 0] 6)])
 
-(def log-layer (LogReg [[0 0 0] [0 0 0]] [0 0] 6))
+(def log-layer [(LogReg [[0 0 0] [0 0 0]] [0 0] 6)])
 
 (def dbn (DBN sigmoid-layers rbm-layers log-layer))
 
@@ -73,7 +73,7 @@
 (deftest DBN-predict-test
   (testing "DBN should make accurate predictions with mocked sigmoid and log layers"
     (let [dbn (DBN sigs rbm-layers log)]
-      (is (= (predict dbn [1 1 0 0 0 0]) [0.9653090289791912 0.03469097102080875])))))
+      (is (= (predict dbn [1 1 0 0 0 0]) [[0.9653090289791912 0.03469097102080875]])))))
 
 (deftest DBN-test
   (testing "DBN should make accurate predictions after training"
