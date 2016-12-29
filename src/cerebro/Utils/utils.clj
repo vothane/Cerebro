@@ -15,3 +15,7 @@
 
 (defn matrix-transpose [m]
   (apply mapv vector m))
+
+(defn dot-product [& matrix]
+  {:pre [(apply == (map count matrix))]}
+  (apply + (apply map * matrix)))

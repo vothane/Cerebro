@@ -1,7 +1,8 @@
 (ns cerebro.DeepBeliefNet
   (:use [cerebro.HiddenLayer.HLayer]
         [cerebro.RestrictedBoltzmannMachine.RBM]
-        [cerebro.LogisticRegression.LogReg]))
+        [cerebro.LogisticRegression.LogReg]
+        [cerebro.Utils.utils]))
 
 ; A deep belief network is obtained by stacking several RBMs on top of each
 ; other. The hidden layer of the RBM at layer `i` becomes the input of the
@@ -34,13 +35,15 @@
               (let [linear-output (reduce (fn [input layer] (activation layer input))
                                           (activation (first sigmoid-layers) x)
                                           (rest sigmoid-layers))
-                    activate (fn [inputs weights] (reduce + (map * inputs weights)))
+                    activate (fn [inputs weights] (map #(dot-product inputs %) weights))
                     output (map #(activate linear-output (:weights (logreg->map %))) log-layers)
-                    _ (println "-----------output-----------") _ (println linear-output) _ (println "-----------output-----------")
-                    bias-out (map + output (:bias log-layers))]
+                    bias-out (map + output (:bias log-layers))
+                    _ (println "-----------output-----------") _ (println bias-out) _ (println "-----------output-----------")                    
+                   
+                    ]
                 (softmax bias-out)))
 
-   :->map {sigmoid-layers sigmoid-layers :rbm-layers rbm-layers :log-layers log-layers}
+   :->map {:sigmoid-layers sigmoid-layers :rbm-layers rbm-layers :log-layers log-layers}
   })  
    
     (declare sample-inputs)
