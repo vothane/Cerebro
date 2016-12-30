@@ -79,7 +79,7 @@
   (testing "DBN should make accurate predictions after training"
     (let [dbn (pretrain dbn training-features 1000 0.1 1)
           dbn (finetune dbn training-features training-predictors 500 0.1)]
-      (is (= (predict dbn [1 1 0 0 0 0]) "This will always fail.")))))
+      (is (= (predict dbn [1 1 0 0 0 0]) [[0.9653090289791912 0.03469097102080875]])))))
 
 (def sigmoid_layers [{:weights [[3.830040562610957 2.2572438689428482 1.1291324614561007 -4.0898381940839315 -2.9943059764521114 -1.4455110000150806] 
                                 [-0.23531638963814172 -0.7089522379361282 2.0373878851804412 0.5388205984585597 0.00909457901571344 -1.4625908870311244] 
