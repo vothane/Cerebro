@@ -19,9 +19,9 @@
                              (map + bias)
                              (softmax)) 
                   dy (map - y p-x|y)
-                  calc-weight (fn [W i j] (-> (* lr dy_i x_j)
+                  calc-weight (fn [W i j] (-> (* lr (nth dy i) (nth x j))
                                               (/ n)
-                                              (+ w_ij)))
+                                              (+ (get-in W [i j]))))
                   W (reduce 
                       (fn [weights [i j]] (put weights i j calc-weight)) 
                       weights
