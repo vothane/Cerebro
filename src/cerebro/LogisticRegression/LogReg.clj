@@ -18,15 +18,16 @@
             (let [p-x|y (->> (map #(reduce + (map * x %)) weights)
                              (map + bias)
                              (softmax)) 
-                  dy    (map - y p-x|y)
-                  w     (mapv
-                          (fn [w_i dy_i] 
-                            (mapv
-                              (fn [w_ij x_j] (+ w_ij (/ (* lr dy_i x_j) n)))
-                              w_i x))
-                          weights dy)
-                  b     (mapv (fn [bias_i dy_i] (+ bias_i (/ (* lr dy_i) n))) bias dy)]
-          (LogReg w b n)))
+                  dy (map - y p-x|y)
+                  calc-weight (fn [W i j] (-> (* lr dy_i x_j)
+                                              (/ n)
+                                              (+ w_ij)))
+                  W (reduce 
+                      (fn [weights [i j]] (put weights i j calc-weight)) 
+                      weights
+                      (for [i (range-rows weights) j (range-cols weights)] [i j]))
+                  b (mapv (fn [bias_i dy_i] (+ bias_i (/ (* lr dy_i) n))) bias dy)]
+          (LogReg W b n)))
 
    :->map {:weights weights :bias bias :n n}
   })
