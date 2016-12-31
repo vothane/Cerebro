@@ -58,7 +58,6 @@
     (defn gibbs-hvh [hbias vbias W h0-sample]
       (let [s-v|h (sample-v-given-h vbias W h0-sample)]
         {:v|h s-v|h :h|v (sample-h-given-v hbias W (:samples s-v|h))}))
- 
 
     (defn calc-weights [ph-mean nh-mean weights] 
       (mapv 

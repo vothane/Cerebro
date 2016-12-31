@@ -19,3 +19,23 @@
 (defn dot-product [& matrix]
   {:pre [(apply == (map count matrix))]}
   (apply + (apply map * matrix)))
+
+(defprotocol Matrix
+  (el [m i j])
+  (put [matrix i j f])
+  (range-rows [m])
+  (range-cols [m])
+  (size [m]))
+
+(extend-protocol Matrix
+  clojure.lang.IPersistentVector
+  (el [m i j]
+    (get-in m [i j]))
+  (put [m i j f]
+    (assoc-in m [i j] (f m i j)))
+  (range-rows [m] 
+    (range (count m)))
+  (range-cols [m] 
+    (range (count (first m))))
+  (size [m] 
+    [(count m) (count (first m))]))
