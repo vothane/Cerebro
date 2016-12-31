@@ -22,10 +22,16 @@
                         (gibbs-hvh hbias vbias weights nh-sample)
                         gibbs-hvh hbias vbias weights ph-sample) (range k))
         {{nv-mean :means nv-sample :samples} :v|h} sample-means
-        {{nh-mean :means nh-sample :samples} :h|v} sample-means]
-
+        {{nh-mean :means nh-sample :samples} :h|v} sample-means
+        calc-weight (fn [W i j]
+                      (-> (* (nth ph-mean i) (nth inputs j))
+                          (- (* (nth nh-mean i) (nth nv-sample j)))
+                          (* lr)
+                          (/ n)
+                          (+ (get-in W [i j]))))]
+        
     {:contrastive-divergence (fn [inputs lr k]
-                               (let [weights (calc-weighrs ph-mean nh-mean weights)
+                               (let [weights (calc-weights weights calc-weight)
                                      hbias (calc-hbias ph-sample nh-mean hbias)
                                      vbias (calc-vbias inputs nv-sample vbias)]
                                  (RBM weights hbias vbias n)))
@@ -59,14 +65,11 @@
       (let [s-v|h (sample-v-given-h vbias W h0-sample)]
         {:v|h s-v|h :h|v (sample-h-given-v hbias W (:samples s-v|h))}))
 
-    (defn calc-weights [ph-mean nh-mean weights] 
-      (mapv 
-        (fn [ph-mean_i nh-mean_i W_i] 
-          (mapv 
-            (fn [W_ij nv-sample_j inputs_j] 
-              (+ W_ij (/ (* lr (- (* ph-mean_i inputs_j) (* nh-mean_i nv-sample_j))) n)))
-            W_i nv-sample inputs))
-        ph-mean nh-mean weights))
+    (defn calc-weights [weights f] 
+      (reduce 
+        (fn [W [i j]] (put W i j f)) 
+        weights
+        (for [i (range-rows weights) j (range-cols weights)] [i j]))) 
 
     (defn calc-hbias [ph-sample nh-mean hbias] 
       (mapv #(+ (/ (* lr (- %1 %2)) n) %3) ph-sample nh-mean hbias))
