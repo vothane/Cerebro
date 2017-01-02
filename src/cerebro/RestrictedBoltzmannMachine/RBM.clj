@@ -22,16 +22,16 @@
                         (gibbs-hvh hbias vbias weights nh-sample)
                         gibbs-hvh hbias vbias weights ph-sample) (range k))
         {{nv-mean :means nv-sample :samples} :v|h} sample-means
-        {{nh-mean :means nh-sample :samples} :h|v} sample-means
-        calc-weight (fn [W i j]
-                      (-> (* (nth ph-mean i) (nth inputs j))
-                          (- (* (nth nh-mean i) (nth nv-sample j)))
-                          (* lr)
-                          (/ n)
-                          (+ (get-in W [i j]))))]
+        {{nh-mean :means nh-sample :samples} :h|v} sample-means]
         
     {:contrastive-divergence (fn [inputs lr k]
-                               (let [weights (calc-weights weights calc-weight)
+                               (let [calc-weight (fn [W i j]
+                                                   (-> (* (nth ph-mean i) (nth inputs j))
+                                                       (- (* (nth nh-mean i) (nth nv-sample j)))
+                                                       (* lr)
+                                                       (/ n)
+                                                       (+ (el W i j))))
+                                     weights (calc-weights weights calc-weight)
                                      hbias (calc-hbias ph-sample nh-mean hbias)
                                      vbias (calc-vbias inputs nv-sample vbias)]
                                  (RBM weights hbias vbias n)))
