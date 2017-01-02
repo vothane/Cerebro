@@ -24,12 +24,12 @@
                                                    gibbs-hvh hbias vbias weights ph-sample) (range k))
                                    {{nv-mean :means nv-sample :samples} :v|h} sample-means
                                    {{nh-mean :means nh-sample :samples} :h|v} sample-means
-                                   calc-weight (fn [W i j]
+                                   calc-weight (fn [weights i j]
                                                   (-> (* (nth ph-mean i) (nth inputs j))
                                                       (- (* (nth nh-mean i) (nth nv-sample j)))
                                                       (* lr)
                                                       (/ n)
-                                                      (+ (el W i j))))
+                                                      (+ (el weights i j))))
                                    weights (calc-weights weights calc-weight)
                                    hbias (calc-hbias ph-sample nh-mean hbias lr n)
                                    vbias (calc-vbias inputs nv-sample vbias lr n)]
@@ -39,14 +39,14 @@
 
     ;; RBM helper functions
     (defn propup [v weights bias]
-      (let [pre-sigmoid-activation (reduce + (map #(* %1 %2) v weights))
-            pre-sigmoid-activation (+ pre-sigmoid-activation bias)]
+      (let [pre-sigmoid-activation (-> (dot-product v weights)
+                                       (+ bias))]
         (sigmoid pre-sigmoid-activation)))
     
     (defn propdown [h W bias idx]
-      (let [weights                (nth (matrix-transpose W) idx) 
-            pre-sigmoid-activation (reduce + (map #(* %1 %2) h weights)) 
-            pre-sigmoid-activation (+ pre-sigmoid-activation bias)]
+      (let [weights (nth (matrix-transpose W) idx) 
+            pre-sigmoid-activation (-> (dot-product h weights)
+                                       (+ bias))]
         (sigmoid pre-sigmoid-activation)))
     
     (defn sample-h-given-v [hbias W v0-sample]
@@ -65,7 +65,7 @@
 
     (defn calc-weights [weights f] 
       (reduce 
-        (fn [W [i j]] (put W i j f)) 
+        (fn [weights [i j]] (put weights i j f)) 
         weights
         (for [i (range-rows weights) j (range-cols weights)] [i j]))) 
 
