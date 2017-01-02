@@ -7,7 +7,7 @@
     (let [v [0 1 1]
           W [-3.85666 1.17140 3.71995]   
           b -0.93577]
-      (is (= (RBM-propup v W b) 0.9812121811403206)))))
+      (is (= (propup v W b) 0.9812121811403206)))))
 
 (deftest prop-down-test
   (testing "RBM propagate down"
@@ -15,7 +15,7 @@
           W [[2.26799 -0.03222 -2.32391] [0.71964 0.35312 -0.69871] [-3.85666 1.17140 3.71995]]
           b -0.13333
           i 2]
-      (is (= (RBM-propdown h W b i) 0.9472455388518453)))))
+      (is (= (propdown h W b i) 0.9472455388518453)))))
 
 (deftest sample-h-given-v-test
   (testing "RBM sample h given v"
@@ -26,7 +26,7 @@
              [-3.8566569510903440  1.171395266717829100  3.7199477886071834]]
           
           means [0.08883754884996532 0.38863798230998053 0.981212016787623]
-          s_h|v (RBM-sample-h-given-v hbias W v)]
+          s_h|v (sample-h-given-v hbias W v)]
       (is (= (:means s_h|v) means))
       (is (every? #{0 1} (:samples s_h|v))))))
 
@@ -39,7 +39,7 @@
              [-3.856656951090344 1.1713952667178291 3.7199477886071834]]
           
           means [0.06082386389198515 0.9394131427398393 0.9472452525970866]
-          s-v|h (RBM-sample-v-given-h vbias W h)]
+          s-v|h (sample-v-given-h vbias W h)]
       (is (= (:means s-v|h) means))
       (is (every? #{0 1} (:samples s-v|h))))))
 
@@ -54,7 +54,7 @@
           
           means-h|v [0.08883754884996532 0.38863798230998053 0.981212016787623]
           means-v|h [0.06082386389198515 0.9394131427398393 0.9472452525970866]
-          gibbs-hvh (RBM-gibbs-hvh hbias vbias W h)]
+          gibbs-hvh (gibbs-hvh hbias vbias W h)]
       (is (= (:means (:v|h gibbs-hvh)) means-v|h))
       (is (every? #{0 1} (:samples (:v|h gibbs-hvh)))) 
       (is (= (:means (:h|v gibbs-hvh)) means-h|v))
@@ -74,8 +74,8 @@
                               [0.1168819685222761 -0.07536252382752073 0.03664860526477033 -0.08211466451905437 0.08318468785208716 -0.1692064711576905]] 
                     :hbias [0.008328909528787289 -0.008938006215604427 0.008299941456760423] 
                     :vbias [0.0 0.0 0.0 0.0 -0.016666666666666673 -0.016666666666666673]}]
-      (with-redefs-fn {#'RBM-sample-h-given-v (fn [a b c] {:means [0.5288111737223027 0.5204003746406894 0.5193159886734721] :samples [1 0 1]})
-                       #'RBM-gibbs-hvh (fn [a b c d] 
+      (with-redefs-fn {#'sample-h-given-v (fn [a b c] {:means [0.5288111737223027 0.5204003746406894 0.5193159886734721] :samples [1 0 1]})
+                       #'gibbs-hvh (fn [a b c d] 
                                          {:v|h {:means [0.5658630728981506 0.4599204997897266 0.5220720174294667 0.4425876572353885 0.5118512337012591 0.4425022458987821] 
                                                 :samples [1 1 1 0 1 1]} 
                                           :h|v {:means [0.5002654282727627 0.5362803729362655 0.5020035125943747]
