@@ -20,8 +20,9 @@
                              (let [{ph-mean :means ph-sample :samples} (sample-h-given-v hbias weights inputs)
                                    sample-means (reduce 
                                                    (fn [{{nh-sample :samples} :h|v} _] 
-                                                   (gibbs-hvh hbias vbias weights nh-sample)
-                                                   gibbs-hvh hbias vbias weights ph-sample) (range k))
+                                                     (gibbs-hvh hbias vbias weights nh-sample))
+                                                   (gibbs-hvh hbias vbias weights ph-sample) 
+                                                   (range k))
                                    {{nv-mean :means nv-sample :samples} :v|h} sample-means
                                    {{nh-mean :means nh-sample :samples} :h|v} sample-means
                                    calc-weight (fn [weights i j]
@@ -39,14 +40,12 @@
 
     ;; RBM helper functions
     (defn propup [v weights bias]
-      (let [pre-sigmoid-activation (-> (dot-product v weights)
-                                       (+ bias))]
+      (let [pre-sigmoid-activation (-> (dot-product v weights) (+ bias))]
         (sigmoid pre-sigmoid-activation)))
     
     (defn propdown [h W bias idx]
       (let [weights (nth (matrix-transpose W) idx) 
-            pre-sigmoid-activation (-> (dot-product h weights)
-                                       (+ bias))]
+            pre-sigmoid-activation (-> (dot-product h weights) (+ bias))]
         (sigmoid pre-sigmoid-activation)))
     
     (defn sample-h-given-v [hbias W v0-sample]
