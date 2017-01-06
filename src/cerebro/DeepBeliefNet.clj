@@ -11,13 +11,11 @@
 ; used for classification, the DBN is treated as a MLP, by adding a logistic
 ; regression layer on top.
 
-
 ;; API functions
 (defn predict [dbn x] ((:predict dbn) x))
 (defn pretrain [dbn X-train epochs lr k] ((:pretrain dbn) X-train epochs lr k))
 (defn finetune [dbn X-train Y-train epochs lr] ((:finetune dbn) X-train Y-train epochs lr))
 (defn dbn->map [dbn] (:->map dbn))
-
 
 (declare contrast-diverge-rbms)
 (declare train-logs)
@@ -58,22 +56,13 @@
             train-log (fn [log] ((:train log) inputs Y-train lr))] 
         (mapv #(cycle-epochs % epochs train-log) logs)))
        
-        
-        (declare sample-hidden-layers)
-
         ;; helper functions for DBN helper functions
-        (defn sample-inputs [hidden-layers train-X]
-          (reduce #(conj %1 sample-hidden-layers %2) (vec train-X) hidden-layers))
+        (defn sample-inputs [hidden-layers input]
+          (reduce 
+            (fn [inputs sigmoid-layer] 
+              (conj inputs (sigmoid-sample-h-given-v sigmoid-layer (last inputs)))) 
+            [input] 
+            hidden-layers))
 
         (defn cycle-epochs [domain epochs f] 
           (reduce (fn [domain _] (f domain)) domain (range epochs)))
-
-        (defmulti sample-hidden-layers (fn [hidden-layers input] (count hidden-layers)))
-
-        (defmethod sample-hidden-layers 1 [_ input] input)
-
-        (defmethod sample-hidden-layers :default [hidden-layers input]
-          (reduce (fn [s-h|v layer] ((:sample-h-given-v layer) s-h|v))
-                  ((:sample-h-given-v (first hidden-layers)) input)
-                  (rest hidden-layers)))
-       

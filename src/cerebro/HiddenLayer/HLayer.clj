@@ -3,6 +3,7 @@
 
 ;; API functions
 (defn activation [sigmoid input] ((:activation sigmoid) input))
+(defn sigmoid-sample-h-given-v [sigmoid input] ((:sample-h-given-v sigmoid) input))
 
 (declare output)
 
@@ -14,13 +15,15 @@
                    (map sigmoid bias-out)))
 
    :sample-h-given-v (fn [inputs]
-                       (mapv (fn [w_i b_i] (binomial 1 (output inputs w_i b_i))) weights bias))
+                       (mapv 
+                         (fn [input-vector weight-vector bias-scalar] 
+                           (binomial 1 (output input-vector weight-vector bias-scalar))) 
+                         inputs weights bias))
   })
      
     ;; helper functions 
-    (defn output [inputs weights bias]
-      (let [linear-output (reduce + (map * inputs weights))
-            linear-output (+ linear-output bias)]
+    (defn output [input-vector weight-vector bias-scalar]
+      (let [linear-output (-> (dot-product input-vector weight-vector) (+ bias-scalar))]
         (sigmoid linear-output)))
 
     
