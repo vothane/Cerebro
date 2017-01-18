@@ -41,28 +41,36 @@
    :->map {:sigmoid-layers sigmoid-layers :rbm-layers rbm-layers :log-layers log-layers}
   })  
    
-    (declare sample-inputs)
+    (declare sample-hidden-layers)
     (declare cycle-epochs)
 
     ;; helper functions for DBN
     
     (defn contrast-diverge-rbms [rbms hidden-layers X-train epochs lr k]
-      (let [inputs (sample-inputs hidden-layers X-train)
+      (let [inputs (sample-hidden-layers hidden-layers X-train)
             con-div (fn [rbm] (contrastive-divergence rbm inputs lr k))] 
         (mapv #(cycle-epochs % epochs con-div) rbms)))
   
     (defn train-logs [logs hidden-layers X-train Y-train epochs lr]
-      (let [inputs (sample-inputs hidden-layers X-train)
+      (let [inputs (sample-hidden-layers hidden-layers X-train)
             train-log (fn [log] ((:train log) inputs Y-train lr))] 
         (mapv #(cycle-epochs % epochs train-log) logs)))
        
+       
+        (declare sample-inputs)
+
         ;; helper functions for DBN helper functions
-        (defn sample-inputs [hidden-layers input]
+
+        (defn sample-hidden-layers [hidden-layers init-input]
           (reduce 
             (fn [inputs sigmoid-layer] 
-              (conj inputs (sigmoid-sample-h-given-v sigmoid-layer (last inputs)))) 
-            [input] 
+              (conj inputs (sample-inputs sigmoid-layer (last inputs)))) 
+            [init-input] 
             hidden-layers))
+        
+        (defn sample-inputs [sigmoid-layer inputs]
+          (mapv #(sigmoid-sample-h-given-v sigmoid-layer %) inputs))
 
         (defn cycle-epochs [domain epochs f] 
           (reduce (fn [domain _] (f domain)) domain (range epochs)))
+        

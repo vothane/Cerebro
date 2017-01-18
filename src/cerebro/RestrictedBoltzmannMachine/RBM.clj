@@ -40,9 +40,7 @@
 
     ;; RBM helper functions
     (defn propup [v weights bias]
-      (let [_ (println "--------------") _ (println v) _ (println "--------------")
-        _ (println "--------------") _ (println weights) _ (println "--------------")
-        pre-sigmoid-activation (-> (dot-product v weights) (+ bias))]
+      (let [pre-sigmoid-activation (-> (dot-product v weights) (+ bias))]
         (sigmoid pre-sigmoid-activation)))
     
     (defn propdown [h W bias idx]
