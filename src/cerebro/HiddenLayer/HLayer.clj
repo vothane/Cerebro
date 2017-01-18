@@ -14,11 +14,11 @@
                        bias-out (map + output bias)]
                    (map sigmoid bias-out)))
 
-   :sample-h-given-v (fn [inputs]
+   :sample-h-given-v (fn [input]
                        (mapv 
-                         (fn [input-vector weight-vector bias-scalar] 
-                           (binomial 1 (output input-vector weight-vector bias-scalar))) 
-                         inputs weights bias))
+                         (fn [weight-vector bias-scalar] 
+                           (binomial 1 (output input weight-vector bias-scalar))) 
+                         weights bias))
   })
      
     ;; helper functions 
