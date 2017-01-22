@@ -43,23 +43,28 @@
    
     (declare sample-hidden-layers)
     (declare cycle-epochs)
+    (declare pretrain-rbms)
 
     ;; helper functions for DBN
     
     (defn contrast-diverge-rbms [rbms hidden-layers X-train epochs lr k]
-      (let [inputs (sample-hidden-layers hidden-layers X-train)
-            con-div (fn [rbm] (contrastive-divergence rbm inputs lr k))] 
-        (mapv #(cycle-epochs % epochs con-div) rbms)))
+      (let [inputs (sample-hidden-layers hidden-layers X-train)] 
+        (pretrain-rbms rbms inputs epochs lr k)))
   
     (defn train-logs [logs hidden-layers X-train Y-train epochs lr]
       (let [inputs (sample-hidden-layers hidden-layers X-train)
             train-log (fn [log] ((:train log) inputs Y-train lr))] 
         (mapv #(cycle-epochs % epochs train-log) logs)))
        
-       
+
         (declare sample-inputs)
 
         ;; helper functions for DBN helper functions
+
+        (defn pretrain-rbms [rbms inputs epochs lr k]
+          (let [con-div (fn [rbm input] (contrastive-divergence rbm input lr k))
+                con-divs (fn [inputs rbm] (reduce #(con-div %1 %2) rbm inputs))]
+            (mapv #(cycle-epochs %1 epochs (partial con-divs inputs)) rbms)))
 
         (defn sample-hidden-layers [hidden-layers init-input]
           (reduce 

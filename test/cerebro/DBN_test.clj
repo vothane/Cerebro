@@ -66,8 +66,8 @@
            (HiddenLayer (last W1) [0.026740498859828266 -0.09725689788213573 -0.9354588375656511])])
 
 (def log1 [(LogReg [[1.362310331208894 0.4118738320958368 -2.1298562224417825] 
-                   [-1.362310331208894 -0.4118738320958366 2.1298562224417825]] 
-                  [0.17633688988848428 -0.17633688988848387]
+                    [-1.362310331208894 -0.4118738320958366 2.1298562224417825]] 
+                   [0.17633688988848428 -0.17633688988848387]
                   6)])
 
 (deftest DBN-predict-test
@@ -79,7 +79,6 @@
   (testing "DBN should make accurate predictions after training"
     (let [dbn (DBN sigs1 rbm-layers log1)
           dbn (pretrain dbn training-features 1000 0.1 1)
-_ (println "\n-------------------\n" dbn "\n-------------------\n")
           dbn (finetune dbn training-features training-predictors 500 0.1)]
       (is (= (predict dbn [1 1 0 0 0 0]) [[0.9653090289791912 0.03469097102080875]])))))
 
