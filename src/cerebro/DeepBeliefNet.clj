@@ -51,10 +51,12 @@
       (let [inputs (sample-hidden-layers (drop-last hidden-layers) X-train)] 
         (pretrain-rbms rbms inputs epochs lr k)))
   
-    (defn train-logs [logs hidden-layers X-train Y-train epochs lr]
+    (defn train-logs [logs hidden-layers X-train y-train epochs lr]
       (let [inputs (sample-hidden-layers hidden-layers X-train)
-            train-log (fn [log] ((:train log) inputs Y-train lr))] 
-        (mapv #(cycle-epochs % epochs train-log) logs)))
+            part-leave (fn [x y] (partition 2 (interleave x y)))
+            trainer (fn [logreg [x y]] (train logreg x y lr))
+            train-log (fn [X logreg] (reduce #(trainer %1 %2) logreg (part-leave X y-train)))] 
+        (mapv #(cycle-epochs (first logs) epochs (partial train-log %)) inputs)))
        
 
         (declare sample-inputs)

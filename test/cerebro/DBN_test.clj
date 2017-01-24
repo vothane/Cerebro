@@ -79,9 +79,8 @@
   (testing "DBN should make accurate predictions after training"
     (let [dbn (DBN sigs1 rbm-layers log1)
           dbn (pretrain dbn training-features 1000 0.1 1)
-          _ (println "\n-------------------\n" (dbn->map dbn) "\n-------------------\n")
           dbn (finetune dbn training-features training-predictors 500 0.1)]
-      (is (= (predict dbn [1 1 0 0 0 0]) [[0.9653090289791912 0.03469097102080875]])))))
+      (is (= (last (predict dbn [1 1 0 0 0 0])) [0.9653090289791912 0.03469097102080875])))))
 
 (def W2 (list  
           [[3.830040562610957 2.2572438689428482 1.1291324614561007 -4.0898381940839315 -2.9943059764521114 -1.4455110000150806] 
